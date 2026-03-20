@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<!-- 宣告 HTML5 文件 -->
+
+<html lang="zh-TW">
+<!-- 設定網頁語言為繁體中文 -->
+
+<head>
+<meta charset="UTF-8">
+<!-- 設定編碼，避免中文亂碼 -->
+
+<title>表單範例</title>
+<!-- 瀏覽器分頁標題 -->
+
+<style>
+/* 設定整體頁面樣式 */
+body{
+    font-family: Arial; /* 字體 */
+    background:#f0f0f0; /* 背景顏色 */
+    padding:30px;       /* 外距 */
+}
+
+/* 表單外框 */
+.container{
+    background:white;
+    padding:20px;
+    width:500px;
+    margin:auto;        /* 置中 */
+    border-radius:10px; /* 圓角 */
+}
+
+/* 標籤樣式 */
+label{
+    display:block;      /* 每個 label 獨立一行 */
+    margin-top:10px;
+    font-weight:bold;
+}
+
+/* 輸入欄位樣式 */
+input,select,textarea{
+    width:100%;
+    padding:6px;
+    margin-top:4px;
+}
+
+/* 單選/多選不要撐滿 */
+.option{
+    width:auto;
+}
+
+/* 按鈕樣式 */
+button{
+    margin-top:15px;
+    padding:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+<!-- 表單外框 -->
+
+<h2> HTML 表單</h2>
+
+<form>
+<!-- 表單開始 -->
+
+<!-- ================= 基本資料 ================= -->
+<fieldset>
+<legend>基本資料</legend>
+<!-- fieldset: 分組，legend: 標題 -->
+
+<label>姓名</label>
+<input type="text" name="name">
+<!-- 一般文字輸入 -->
+
+<label>密碼</label>
+<input type="password" name="password">
+<!-- 密碼會顯示成 ●●● -->
+
+<label>Email</label>
+<input type="email" name="email">
+<!-- 限制輸入 Email 格式 -->
+
+<label>電話</label>
+<input type="tel" name="phone">
+<!-- 電話輸入 -->
+
+<label>年齡</label>
+<input type="number" name="age" min="0" max="120">
+<!-- 數字輸入，可設定範圍 -->
+
+<label>網站</label>
+<input type="url" name="website">
+<!-- 必須是網址格式 -->
+
+<label>搜尋</label>
+<input type="search" name="search">
+<!-- 搜尋欄位 -->
+
+</fieldset>
+
+
+<!-- ================= 日期時間 ================= -->
+<fieldset>
+<legend>日期時間</legend>
+
+<label>生日</label>
+<input type="date" name="birthday">
+<!-- 日期選擇器 -->
+
+<label>時間</label>
+<input type="time" name="time">
+<!-- 時間選擇 -->
+
+<label>日期時間</label>
+<input type="datetime-local" name="datetime">
+<!-- 日期 + 時間 -->
+
+<label>月份</label>
+<input type="month" name="month">
+<!-- 選月份 -->
+
+<label>週</label>
+<input type="week" name="week">
+<!-- 選第幾週 -->
+
+</fieldset>
+
+
+<!-- ================= 選項 ================= -->
+<fieldset>
+<legend>選項</legend>
+
+<label>性別</label>
+
+<input class="option" type="radio" name="gender"> 男
+<input class="option" type="radio" name="gender"> 女
+<input class="option" type="radio" name="gender"> 其他
+<!-- radio：同一個 name 只能選一個 -->
+
+<label>興趣</label>
+
+<input class="option" type="checkbox"> 音樂
+<input class="option" type="checkbox"> 運動
+<input class="option" type="checkbox"> 遊戲
+<input class="option" type="checkbox"> 閱讀
+<!-- checkbox：可多選 -->
+
+</fieldset>
+
+
+<!-- ================= 下拉選單 ================= -->
+<fieldset>
+<legend>下拉選單</legend>
+
+<label>城市</label>
+
+<select name="city">
+<!-- 下拉選單 -->
+
+<option value="">請選擇</option>
+<option>台北</option>
+<option>台中</option>
+<option>台南</option>
+<option>高雄</option>
+
+</select>
+
+</fieldset>
+
+
+<!-- ================= 自動建議 ================= -->
+<fieldset>
+<legend>建議輸入</legend>
+
+<label>瀏覽器</label>
+
+<input list="browsers" name="browser">
+<!-- list 會連接 datalist -->
+
+<datalist id="browsers">
+<!-- 提供建議選項 -->
+<option value="Chrome">
+<option value="Edge">
+<option value="Firefox">
+<option value="Safari">
+</datalist>
+
+</fieldset>
+
+
+<!-- ================= 其他輸入 ================= -->
+<fieldset>
+<legend>其他輸入</legend>
+
+<label>顏色</label>
+<input type="color" name="color">
+<!-- 顏色選擇器 -->
+
+<label>範圍</label>
+<input type="range" name="range" min="0" max="100">
+<!-- 滑桿 -->
+
+<label>檔案上傳</label>
+<input type="file" name="file">
+<!-- 上傳檔案 -->
+
+<label>留言</label>
+<textarea name="message" rows="4"></textarea>
+<!-- 多行文字 -->
+
+</fieldset>
+
+
+<!-- ================= 隱藏欄位 ================= -->
+<fieldset>
+<legend>隱藏資料</legend>
+
+<input type="hidden" name="userid" value="12345">
+<!-- 使用者看不到，但會送出 -->
+
+</fieldset>
+
+
+<!-- ================= 狀態顯示 ================= -->
+<fieldset>
+<legend>狀態顯示</legend>
+
+<label>下載進度</label>
+<progress value="70" max="100"></progress>
+<!-- 進度條 -->
+
+<br><br>
+
+<label>使用率</label>
+<meter value="0.6"></meter>
+<!-- 比例條 -->
+
+</fieldset>
+
+
+<br>
+
+<!-- 按鈕區 -->
+<button type="submit">送出</button>
+<!-- 送出表單 -->
+
+<button type="reset">重設</button>
+<!-- 清空所有欄位 -->
+
+<button type="button">普通按鈕</button>
+<!-- 沒有功能（通常配合 JS） -->
+
+</form>
+
+</div>
+
+</body>
+</html>
