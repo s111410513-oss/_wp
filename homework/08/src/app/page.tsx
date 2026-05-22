@@ -182,7 +182,13 @@ export default function HomePage() {
       ) : (
         <div style={cardStyle}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <h2 style={{ margin: 0 }}>{playerName}</h2>
+            <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+              <button onClick={resetGame} style={{
+                background: "none", border: "none", cursor: "pointer", fontSize: "0.85rem",
+                color: "#888", padding: 0, fontWeight: 500,
+              }}>← 大廳</button>
+              <h2 style={{ margin: 0 }}>{playerName}</h2>
+            </div>
             <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
               {game.mode === "challenge" && (
                 <span style={{
