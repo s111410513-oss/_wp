@@ -7,22 +7,34 @@ type Score = {
   id: number;
   playerName: string;
   attempts: number;
+  difficulty: string;
   createdAt: string;
 };
+
+const DIFFICULTIES = ["all", "easy", "hard", "extreme"] as const;
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const [scores, setScores] = useState<Score[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
-    fetch("/api/leaderboard")
+    setLoading(true);
+    const url = filter === "all" ? "/api/leaderboard" : `/api/leaderboard?difficulty=${filter}`;
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         setScores(data);
         setLoading(false);
       });
-  }, []);
+  }, [filter]);
+
+  const diffColor: Record<string, string> = {
+    easy: "#52c41a",
+    hard: "#fa8c16",
+    extreme: "#f5222d",
+  };
 
   return (
     <main style={{ maxWidth: 600, margin: "0 auto", padding: "2rem 1rem" }}>
@@ -33,6 +45,22 @@ export default function LeaderboardPage() {
         <button onClick={() => router.push("/")} style={btnStyle}>
           ← Back to Game
         </button>
+      </div>
+
+      <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginBottom: "1rem" }}>
+        {DIFFICULTIES.map((d) => (
+          <button
+            key={d}
+            onClick={() => setFilter(d)}
+            style={{
+              ...btnStyle,
+              background: filter === d ? "#1677ff" : "#e0e0e0",
+              color: filter === d ? "white" : "#333",
+            }}
+          >
+            {d === "all" ? "All" : d.charAt(0).toUpperCase() + d.slice(1)}
+          </button>
+        ))}
       </div>
 
       {loading ? (
@@ -47,6 +75,7 @@ export default function LeaderboardPage() {
                 <th style={thStyle}>Rank</th>
                 <th style={thStyle}>Player</th>
                 <th style={thStyle}>Attempts</th>
+                <th style={thStyle}>Difficulty</th>
                 <th style={thStyle}>Date</th>
               </tr>
             </thead>
@@ -56,6 +85,18 @@ export default function LeaderboardPage() {
                   <td style={tdStyle}>{i + 1}</td>
                   <td style={tdStyle}>{score.playerName}</td>
                   <td style={tdStyle}>{score.attempts}</td>
+                  <td style={tdStyle}>
+                    <span style={{
+                      background: diffColor[score.difficulty] || "#999",
+                      color: "white",
+                      padding: "0.15rem 0.5rem",
+                      borderRadius: 10,
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                    }}>
+                      {score.difficulty}
+                    </span>
+                  </td>
                   <td style={tdStyle}>{new Date(score.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}

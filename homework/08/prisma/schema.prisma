@@ -8,8 +8,9 @@ datasource db {
 }
 
 model Score {
-  id        Int      @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   playerName String
-  attempts  Int
-  createdAt DateTime @default(now())
+  attempts   Int
+  difficulty String   @default("easy")
+  createdAt  DateTime @default(now())
 }
