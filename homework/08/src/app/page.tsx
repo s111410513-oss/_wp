@@ -9,9 +9,11 @@ type GameData = {
   max: number;
   difficulty: string;
   level?: number;
+  attempts?: number;
   attemptsLeft?: number;
   maxAttempts?: number;
   hintsLeft?: number;
+  totalAttempts?: number;
   startedAt: number;
   message: string;
 };
@@ -30,6 +32,16 @@ type GuessData = {
   cleared?: number;
   levelsCleared?: number;
   totalAttempts?: number;
+};
+
+type ResultData = {
+  mode: "normal" | "challenge";
+  difficulty: string;
+  message: string;
+  attempts?: number;
+  levelsCleared?: number;
+  totalAttempts?: number;
+  hintsLeft?: number;
 };
 
 const MODES = [
@@ -66,6 +78,7 @@ export default function HomePage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [idleTime, setIdleTime] = useState(0);
   const [idleWarning, setIdleWarning] = useState(false);
+  const [result, setResult] = useState<ResultData | null>(null);
 
   const gameRef = useRef(game);
   gameRef.current = game;
@@ -85,7 +98,17 @@ export default function HomePage() {
       const remaining = Math.max(0, Math.floor((gameRef.current!.startedAt + 600000 - Date.now()) / 1000));
       setTimeLeft(remaining);
       if (remaining <= 0 && gameRef.current?.gameId) {
-        setGame((prev) => prev ? { ...prev, gameId: "", message: "⏰ 時間到！遊戲已結束。" } : prev);
+        const g = gameRef.current;
+        setResult({
+          mode: g.mode,
+          difficulty: g.difficulty,
+          message: "⏰ 時間到！遊戲已結束。",
+          attempts: g.mode === "normal" ? g.attempts : undefined,
+          levelsCleared: g.mode === "challenge" ? (g.level ?? 1) - 1 : undefined,
+          totalAttempts: g.totalAttempts,
+          hintsLeft: g.hintsLeft,
+        });
+        setGame(null);
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -157,7 +180,16 @@ export default function HomePage() {
       }
 
       if (data.result === "correct" || data.result === "gameover") {
-        setGame({ ...g, message: data.message, gameId: "" });
+        setResult({
+          mode: data.mode,
+          difficulty: data.difficulty || g.difficulty,
+          message: data.message,
+          attempts: data.attempts,
+          levelsCleared: data.levelsCleared,
+          totalAttempts: data.totalAttempts,
+          hintsLeft: data.hintsLeft,
+        });
+        setGame(null);
       } else if (data.result === "levelup") {
         setGame({
           gameId: g.gameId,
@@ -168,14 +200,17 @@ export default function HomePage() {
           attemptsLeft: data.attemptsLeft,
           maxAttempts: data.maxAttempts,
           hintsLeft: data.hintsLeft ?? g.hintsLeft,
+          totalAttempts: data.totalAttempts,
           startedAt: g.startedAt,
           message: data.message,
         });
       } else {
         setGame((prev) => prev ? {
           ...prev,
+          attempts: data.attempts ?? prev.attempts,
           attemptsLeft: data.attemptsLeft ?? prev.attemptsLeft,
           hintsLeft: data.hintsLeft ?? prev.hintsLeft,
+          totalAttempts: data.totalAttempts ?? prev.totalAttempts,
           message: data.message,
         } : prev);
       }
@@ -213,6 +248,7 @@ export default function HomePage() {
 
   function resetGame() {
     setGame(null);
+    setResult(null);
     setGuess("");
     setTimeLeft(0);
     setIdleTime(0);
@@ -244,7 +280,49 @@ export default function HomePage() {
         <button onClick={() => router.push("/leaderboard")} style={btnStyle}>🏆 Leaderboard</button>
       </div>
 
-      {!game ? (
+      {result ? (
+        <div style={cardStyle}>
+          <h2 style={{ textAlign: "center", margin: 0 }}>📊 結算</h2>
+          <p style={{
+            textAlign: "center", fontSize: "1.1rem", fontWeight: 500,
+            color: result.mode === "challenge" ? "#722ed1" : "#1677ff",
+          }}>{result.mode === "challenge" ? "闖關模式" : "一般模式"} — {
+            (result.mode === "challenge"
+              ? CHALLENGE_DIFFS.find((d) => d.key === result.difficulty)?.label
+              : NORMAL_DIFFS.find((d) => d.key === result.difficulty)?.label) || result.difficulty
+          }</p>
+          <p style={{ fontSize: "1rem", color: "#555", textAlign: "center" }}>{result.message}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.5rem 0" }}>
+            {result.mode === "normal" && result.attempts !== undefined && (
+              <div style={statRowStyle}>
+                <span>總嘗試次數</span><span style={{ fontWeight: 700 }}>{result.attempts} 次</span>
+              </div>
+            )}
+            {result.mode === "challenge" && (
+              <>
+                <div style={statRowStyle}>
+                  <span>通過關卡</span><span style={{ fontWeight: 700 }}>{result.levelsCleared ?? 0} 關</span>
+                </div>
+                <div style={statRowStyle}>
+                  <span>總嘗試次數</span><span style={{ fontWeight: 700 }}>{result.totalAttempts ?? 0} 次</span>
+                </div>
+                {result.hintsLeft !== undefined && (
+                  <div style={statRowStyle}>
+                    <span>剩餘提示</span><span style={{ fontWeight: 700 }}>{result.hintsLeft} / 3</span>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+            <button onClick={() => {
+              handleStartGame();
+              setResult(null);
+            }} style={btnStyle}>🔄 再玩一次</button>
+            <button onClick={resetGame} style={{ ...btnStyle, background: "#888" }}>🏠 回大廳</button>
+          </div>
+        </div>
+      ) : !game ? (
         <div style={cardStyle}>
           {idleWarning && (
             <div style={{
@@ -423,4 +501,10 @@ const inputStyle: React.CSSProperties = {
 const btnStyle: React.CSSProperties = {
   padding: "0.6rem 1.2rem", fontSize: "1rem", background: "#1677ff",
   color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 500,
+};
+
+const statRowStyle: React.CSSProperties = {
+  display: "flex", justifyContent: "space-between",
+  padding: "0.4rem 0.8rem", background: "#f9f9f9", borderRadius: 6,
+  fontSize: "0.95rem",
 };

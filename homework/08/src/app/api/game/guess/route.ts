@@ -15,9 +15,24 @@ export async function POST(req: NextRequest) {
   const elapsed = Date.now() - game.startedAt;
   if (elapsed > 600000) {
     games.delete(gameId);
+    if (game.mode === "challenge") {
+      const cg = game as ChallengeGame;
+      return NextResponse.json({
+        result: "gameover",
+        mode: "challenge",
+        levelsCleared: cg.level - 1,
+        totalAttempts: cg.totalAttempts,
+        hintsLeft: cg.hintsLeft,
+        difficulty: cg.difficulty,
+        message: "⏰ 時間到！遊戲已結束。",
+      });
+    }
     return NextResponse.json({
       result: "gameover",
-      message: "時間到！遊戲已結束。",
+      mode: "normal",
+      attempts: game.attempts,
+      difficulty: game.difficulty,
+      message: "⏰ 時間到！遊戲已結束。",
     });
   }
 
@@ -54,6 +69,7 @@ export async function POST(req: NextRequest) {
         attemptsLeft: nextMaxAttempts,
         maxAttempts: nextMaxAttempts,
         hintsLeft: cg.hintsLeft,
+        totalAttempts: cg.totalAttempts,
         cleared: cg.level,
         message: `Level ${cg.level} cleared! Now Level ${nextLevel} (1-${nextMax}). You have ${nextMaxAttempts} attempt(s).`,
       });
@@ -91,6 +107,7 @@ export async function POST(req: NextRequest) {
       max: cg.max,
       attemptsLeft: cg.attemptsLeft,
       hintsLeft: cg.hintsLeft,
+      totalAttempts: cg.totalAttempts,
       message: n < cg.number
         ? `Higher than ${n} (1-${cg.max}). ${cg.attemptsLeft} attempt(s) left.`
         : `Lower than ${n} (1-${cg.max}). ${cg.attemptsLeft} attempt(s) left.`,
