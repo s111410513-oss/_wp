@@ -11,6 +11,7 @@ type GameData = {
   level?: number;
   attemptsLeft?: number;
   maxAttempts?: number;
+  hintsLeft?: number;
   message: string;
 };
 
@@ -24,6 +25,7 @@ type GuessData = {
   max?: number;
   attemptsLeft?: number;
   maxAttempts?: number;
+  hintsLeft?: number;
   cleared?: number;
   levelsCleared?: number;
   totalAttempts?: number;
@@ -41,9 +43,15 @@ const NORMAL_DIFFS = [
 ] as const;
 
 const CHALLENGE_DIFFS = [
-  { key: "easy", label: "普通", sub: "3 次" },
-  { key: "hard", label: "困難", sub: "3 次" },
-  { key: "extreme", label: "極度困難", sub: "3 次" },
+  { key: "easy", label: "普通", sub: "" },
+  { key: "hard", label: "困難", sub: "" },
+  { key: "extreme", label: "極度困難", sub: "" },
+] as const;
+
+const HINTS = [
+  { key: "oddEven", label: "奇數/偶數" },
+  { key: "prime", label: "是否為質數" },
+  { key: "range", label: "大約區間" },
 ] as const;
 
 export default function HomePage() {
@@ -120,18 +128,44 @@ export default function HomePage() {
           level: data.level,
           attemptsLeft: data.attemptsLeft,
           maxAttempts: data.maxAttempts,
+          hintsLeft: data.hintsLeft ?? g.hintsLeft,
           message: data.message,
         });
       } else {
         setGame((prev) => prev ? {
           ...prev,
           attemptsLeft: data.attemptsLeft ?? prev.attemptsLeft,
+          hintsLeft: data.hintsLeft ?? prev.hintsLeft,
           message: data.message,
         } : prev);
       }
       setGuess("");
     } catch {
       setGame(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleUseHint(hintType: string) {
+    const g = gameRef.current;
+    if (!g || !g.gameId || g.mode !== "challenge") return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/game/hint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId: g.gameId, hintType }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setGame((prev) => prev ? { ...prev, message: data.error || "無法使用提示" } : prev);
+        setLoading(false);
+        return;
+      }
+      setGame((prev) => prev ? { ...prev, hintsLeft: data.hintsLeft, message: data.message } : prev);
+    } catch {
+      setGame((prev) => prev ? { ...prev, message: "提示系統錯誤" } : prev);
     } finally {
       setLoading(false);
     }
@@ -264,6 +298,32 @@ export default function HomePage() {
                   {loading ? "..." : "猜"}
                 </button>
               </div>
+              {game.mode === "challenge" && (
+                <div>
+                  <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", marginBottom: "0.4rem" }}>
+                    <span style={{ fontSize: "0.85rem", color: "#888", fontWeight: 500 }}>
+                      💡 提示 ({game.hintsLeft ?? 0}/3)
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.4rem" }}>
+                    {HINTS.map((h) => (
+                      <button
+                        key={h.key}
+                        onClick={() => handleUseHint(h.key)}
+                        disabled={loading || (game.hintsLeft ?? 0) <= 0}
+                        style={{
+                          flex: 1, fontSize: "0.78rem", padding: "0.35rem 0.3rem",
+                          background: "#f0f0f0", color: "#333", border: "1px solid #ddd",
+                          borderRadius: 6, cursor: "pointer", fontWeight: 500,
+                          opacity: (game.hintsLeft ?? 0) <= 0 ? 0.5 : 1,
+                        }}
+                      >
+                        {h.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </>
           )}
 

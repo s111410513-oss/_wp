@@ -15,6 +15,7 @@ export interface ChallengeGame {
   maxAttempts: number;
   difficulty: string;
   totalAttempts: number;
+  hintsLeft: number;
 }
 
 export type GameState = NormalGame | ChallengeGame;

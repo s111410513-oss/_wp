@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
       maxAttempts,
       difficulty,
       totalAttempts: 0,
+      hintsLeft: 3,
     });
 
     return NextResponse.json({
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
       attemptsLeft: maxAttempts,
       maxAttempts,
       difficulty,
+      hintsLeft: 3,
       message: `Level 1: Guess a number between 1 and ${max}. You have ${maxAttempts} attempt(s).`,
     });
   }

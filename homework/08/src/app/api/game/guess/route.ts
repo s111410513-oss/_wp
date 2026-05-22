@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
         max: nextMax,
         attemptsLeft: nextMaxAttempts,
         maxAttempts: nextMaxAttempts,
+        hintsLeft: cg.hintsLeft,
         cleared: cg.level,
         message: `Level ${cg.level} cleared! Now Level ${nextLevel} (1-${nextMax}). You have ${nextMaxAttempts} attempt(s).`,
       });
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
         mode: "challenge",
         levelsCleared: cg.level - 1,
         totalAttempts: cg.totalAttempts,
+        hintsLeft: cg.hintsLeft,
         message: `Game Over! You cleared ${cg.level - 1} level(s) with ${cg.totalAttempts} total guess(es).`,
       });
     }
@@ -79,6 +81,7 @@ export async function POST(req: NextRequest) {
       level: cg.level,
       max: cg.max,
       attemptsLeft: cg.attemptsLeft,
+      hintsLeft: cg.hintsLeft,
       message: n < cg.number
         ? `Higher than ${n} (1-${cg.max}). ${cg.attemptsLeft} attempt(s) left.`
         : `Lower than ${n} (1-${cg.max}). ${cg.attemptsLeft} attempt(s) left.`,
