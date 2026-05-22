@@ -12,6 +12,15 @@ export async function POST(req: NextRequest) {
 
   const game = games.get(gameId)!;
 
+  const elapsed = Date.now() - game.startedAt;
+  if (elapsed > 600000) {
+    games.delete(gameId);
+    return NextResponse.json({
+      result: "gameover",
+      message: "時間到！遊戲已結束。",
+    });
+  }
+
   const n = Number(guess);
   if (!Number.isInteger(n) || n < 1 || n > game.max) {
     return NextResponse.json({ error: `Guess must be an integer between 1 and ${game.max}` }, { status: 400 });

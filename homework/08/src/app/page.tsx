@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 type GameData = {
@@ -12,6 +12,7 @@ type GameData = {
   attemptsLeft?: number;
   maxAttempts?: number;
   hintsLeft?: number;
+  startedAt: number;
   message: string;
 };
 
@@ -43,9 +44,9 @@ const NORMAL_DIFFS = [
 ] as const;
 
 const CHALLENGE_DIFFS = [
-  { key: "easy", label: "普通", sub: "" },
-  { key: "hard", label: "困難", sub: "" },
-  { key: "extreme", label: "極度困難", sub: "" },
+  { key: "easy", label: "普通", sub: "18 次起" },
+  { key: "hard", label: "困難", sub: "12 次起" },
+  { key: "extreme", label: "極度困難", sub: "10 次起" },
 ] as const;
 
 const HINTS = [
@@ -62,9 +63,13 @@ export default function HomePage() {
   const [game, setGame] = useState<GameData | null>(null);
   const [guess, setGuess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [idleTime, setIdleTime] = useState(0);
+  const [idleWarning, setIdleWarning] = useState(false);
 
   const gameRef = useRef(game);
   gameRef.current = game;
+  const idleTimedOutRef = useRef(false);
   const guessRef = useRef(guess);
   guessRef.current = guess;
   const playerNameRef = useRef(playerName);
@@ -73,6 +78,39 @@ export default function HomePage() {
   modeRef.current = mode;
   const difficultyRef = useRef(difficulty);
   difficultyRef.current = difficulty;
+
+  useEffect(() => {
+    if (!game || !game.startedAt || !game.gameId) return;
+    const interval = setInterval(() => {
+      const remaining = Math.max(0, Math.floor((gameRef.current!.startedAt + 600000 - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining <= 0 && gameRef.current?.gameId) {
+        setGame((prev) => prev ? { ...prev, gameId: "", message: "⏰ 時間到！遊戲已結束。" } : prev);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [game]);
+
+  useEffect(() => {
+    if (game !== null) {
+      idleTimedOutRef.current = false;
+      setIdleTime(0);
+      setIdleWarning(false);
+      return;
+    }
+    if (idleTimedOutRef.current) return;
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - start) / 1000);
+      setIdleTime(elapsed);
+      if (elapsed >= 120) setIdleWarning(true);
+      if (elapsed >= 180) {
+        idleTimedOutRef.current = true;
+        forceReset();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [game]);
 
   async function handleStartGame() {
     const name = playerNameRef.current.trim();
@@ -90,6 +128,7 @@ export default function HomePage() {
       }
       const data = await res.json();
       setGame(data);
+      setTimeLeft(600);
       setGuess("");
     } catch {
       setGame(null);
@@ -129,6 +168,7 @@ export default function HomePage() {
           attemptsLeft: data.attemptsLeft,
           maxAttempts: data.maxAttempts,
           hintsLeft: data.hintsLeft ?? g.hintsLeft,
+          startedAt: g.startedAt,
           message: data.message,
         });
       } else {
@@ -174,6 +214,20 @@ export default function HomePage() {
   function resetGame() {
     setGame(null);
     setGuess("");
+    setTimeLeft(0);
+    setIdleTime(0);
+    setIdleWarning(false);
+  }
+
+  function forceReset() {
+    setPlayerName("");
+    setMode("normal");
+    setDifficulty("easy");
+    setGame(null);
+    setGuess("");
+    setTimeLeft(0);
+    setIdleTime(0);
+    setIdleWarning(false);
   }
 
   const diffs = mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS;
@@ -192,6 +246,14 @@ export default function HomePage() {
 
       {!game ? (
         <div style={cardStyle}>
+          {idleWarning && (
+            <div style={{
+              background: "#fff3cd", color: "#856404", padding: "0.5rem 1rem",
+              borderRadius: 8, fontSize: "0.85rem", fontWeight: 500, border: "1px solid #ffc107",
+            }}>
+              ⚠ 閒置超過 2 分鐘，再 1 分鐘後將自動關閉遊戲
+            </div>
+          )}
           <h2>開始新遊戲</h2>
           <input
             value={playerName}
@@ -273,6 +335,17 @@ export default function HomePage() {
                   : NORMAL_DIFFS.find((d) => d.key === game.difficulty)?.label || game.difficulty}
               </span>
             </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {game.gameId && (
+              <span style={{
+                fontSize: "0.9rem", fontWeight: 600,
+                color: timeLeft <= 60 ? "#f5222d" : "#333",
+              }}>
+                ⏱ {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+              </span>
+            )}
           </div>
 
           <p style={{ fontSize: "1.2rem", fontWeight: 500 }}>{game.message}</p>

@@ -4,6 +4,7 @@ export interface NormalGame {
   max: number;
   attempts: number;
   difficulty: string;
+  startedAt: number;
 }
 
 export interface ChallengeGame {
@@ -16,6 +17,7 @@ export interface ChallengeGame {
   difficulty: string;
   totalAttempts: number;
   hintsLeft: number;
+  startedAt: number;
 }
 
 export type GameState = NormalGame | ChallengeGame;

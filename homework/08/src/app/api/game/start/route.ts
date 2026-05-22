@@ -27,6 +27,8 @@ export async function POST(req: NextRequest) {
     const maxAttempts = getMaxAttempts(difficulty, level);
     const number = Math.floor(Math.random() * max) + 1;
 
+    const now = Date.now();
+
     games.set(gameId, {
       mode: "challenge",
       number,
@@ -37,6 +39,7 @@ export async function POST(req: NextRequest) {
       difficulty,
       totalAttempts: 0,
       hintsLeft: 3,
+      startedAt: now,
     });
 
     return NextResponse.json({
@@ -48,6 +51,7 @@ export async function POST(req: NextRequest) {
       maxAttempts,
       difficulty,
       hintsLeft: 3,
+      startedAt: now,
       message: `Level 1: Guess a number between 1 and ${max}. You have ${maxAttempts} attempt(s).`,
     });
   }
@@ -57,6 +61,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid difficulty. Choose: easy, hard, extreme" }, { status: 400 });
   }
 
+  const now = Date.now();
   const number = Math.floor(Math.random() * max) + 1;
 
   games.set(gameId, {
@@ -65,6 +70,7 @@ export async function POST(req: NextRequest) {
     max,
     attempts: 0,
     difficulty,
+    startedAt: now,
   });
 
   return NextResponse.json({
@@ -72,6 +78,7 @@ export async function POST(req: NextRequest) {
     mode: "normal",
     max,
     difficulty,
+    startedAt: now,
     message: `[${difficulty.toUpperCase()}] Guess a number between 1 and ${max}, ${playerName}!`,
   });
 }
