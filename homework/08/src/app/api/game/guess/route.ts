@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     if (n === cg.number) {
       const nextLevel = cg.level + 1;
       const nextMax = cg.max + 255;
+      const nextMaxAttempts = cg.baseAttempts + (nextLevel - 1) * cg.bonusPerLevel;
       const nextNumber = Math.floor(Math.random() * nextMax) + 1;
 
       games.set(gameId, {
@@ -31,7 +32,8 @@ export async function POST(req: NextRequest) {
         number: nextNumber,
         max: nextMax,
         level: nextLevel,
-        attemptsLeft: cg.maxAttempts,
+        maxAttempts: nextMaxAttempts,
+        attemptsLeft: nextMaxAttempts,
       });
 
       return NextResponse.json({
@@ -39,9 +41,10 @@ export async function POST(req: NextRequest) {
         mode: "challenge",
         level: nextLevel,
         max: nextMax,
-        attemptsLeft: cg.maxAttempts,
+        attemptsLeft: nextMaxAttempts,
+        maxAttempts: nextMaxAttempts,
         cleared: cg.level,
-        message: `Level ${cg.level} cleared! Now Level ${nextLevel} (1-${nextMax}). ${cg.maxAttempts} attempt(s) remaining.`,
+        message: `Level ${cg.level} cleared! Now Level ${nextLevel} (1-${nextMax}). You have ${nextMaxAttempts} attempt(s).`,
       });
     }
 

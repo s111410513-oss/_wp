@@ -10,6 +10,7 @@ type GameData = {
   difficulty: string;
   level?: number;
   attemptsLeft?: number;
+  maxAttempts?: number;
   message: string;
 };
 
@@ -22,6 +23,7 @@ type GuessData = {
   level?: number;
   max?: number;
   attemptsLeft?: number;
+  maxAttempts?: number;
   cleared?: number;
   levelsCleared?: number;
   totalAttempts?: number;
@@ -89,6 +91,7 @@ export default function HomePage() {
         difficulty: game.difficulty,
         level: data.level,
         attemptsLeft: data.attemptsLeft,
+        maxAttempts: data.maxAttempts,
         message: data.message,
       });
     } else {
@@ -206,7 +209,7 @@ export default function HomePage() {
             <>
               {game.mode === "challenge" && (
                 <p style={{ color: "#722ed1", fontWeight: 600 }}>
-                  剩餘嘗試：{game.attemptsLeft} / {CHALLENGE_ATTEMPT_MAP[game.difficulty]} 次
+                  剩餘嘗試：{game.attemptsLeft} / {game.maxAttempts ?? CHALLENGE_ATTEMPT_MAP[game.difficulty]} 次
                 </p>
               )}
               <div style={{ display: "flex", gap: "0.5rem" }}>

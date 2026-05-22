@@ -13,6 +13,8 @@ export interface ChallengeGame {
   level: number;
   attemptsLeft: number;
   maxAttempts: number;
+  baseAttempts: number;
+  bonusPerLevel: number;
   difficulty: string;
   totalAttempts: number;
 }
