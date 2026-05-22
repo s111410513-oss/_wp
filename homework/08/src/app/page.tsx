@@ -41,9 +41,9 @@ const NORMAL_DIFFS = [
 ] as const;
 
 const CHALLENGE_DIFFS = [
-  { key: "easy", label: "普通", sub: "20 次" },
-  { key: "hard", label: "困難", sub: "10 次" },
-  { key: "extreme", label: "極度困難", sub: "5 次" },
+  { key: "easy", label: "普通", sub: "3 次" },
+  { key: "hard", label: "困難", sub: "3 次" },
+  { key: "extreme", label: "極度困難", sub: "3 次" },
 ] as const;
 
 export default function HomePage() {
