@@ -1,31 +1,76 @@
 import { NextRequest, NextResponse } from "next/server";
 import { games } from "@/lib/game-store";
 
-const DIFFICULTIES: Record<string, number> = {
+const NORMAL_DIFFICULTIES: Record<string, number> = {
   easy: 100,
   hard: 500,
   extreme: 2000,
 };
 
+const CHALLENGE_ATTEMPTS: Record<string, number> = {
+  easy: 20,
+  hard: 10,
+  extreme: 5,
+};
+
 export async function POST(req: NextRequest) {
-  const { playerName, difficulty = "easy" } = await req.json();
+  const { playerName, mode = "normal", difficulty = "easy" } = await req.json();
 
   if (!playerName || typeof playerName !== "string" || playerName.trim().length === 0) {
     return NextResponse.json({ error: "playerName is required" }, { status: 400 });
   }
 
-  const max = DIFFICULTIES[difficulty];
+  const gameId = crypto.randomUUID();
+
+  if (mode === "challenge") {
+    const maxAttempts = CHALLENGE_ATTEMPTS[difficulty];
+    if (!maxAttempts) {
+      return NextResponse.json({ error: "Invalid difficulty. Choose: easy, hard, extreme" }, { status: 400 });
+    }
+
+    const initialMax = 1000;
+    const number = Math.floor(Math.random() * initialMax) + 1;
+
+    games.set(gameId, {
+      mode: "challenge",
+      number,
+      max: initialMax,
+      level: 1,
+      attemptsLeft: maxAttempts,
+      maxAttempts,
+      difficulty,
+      totalAttempts: 0,
+    });
+
+    return NextResponse.json({
+      gameId,
+      mode: "challenge",
+      level: 1,
+      max: initialMax,
+      attemptsLeft: maxAttempts,
+      difficulty,
+      message: `Level 1: Guess a number between 1 and ${initialMax}. You have ${maxAttempts} attempt(s).`,
+    });
+  }
+
+  const max = NORMAL_DIFFICULTIES[difficulty];
   if (!max) {
     return NextResponse.json({ error: "Invalid difficulty. Choose: easy, hard, extreme" }, { status: 400 });
   }
 
-  const gameId = crypto.randomUUID();
   const number = Math.floor(Math.random() * max) + 1;
 
-  games.set(gameId, { number, max, attempts: 0, difficulty });
+  games.set(gameId, {
+    mode: "normal",
+    number,
+    max,
+    attempts: 0,
+    difficulty,
+  });
 
   return NextResponse.json({
     gameId,
+    mode: "normal",
     max,
     difficulty,
     message: `[${difficulty.toUpperCase()}] Guess a number between 1 and ${max}, ${playerName}!`,

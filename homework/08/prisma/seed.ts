@@ -5,13 +5,15 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.score.createMany({
     data: [
-      { playerName: "Alice", attempts: 5, difficulty: "easy" },
-      { playerName: "Bob", attempts: 7, difficulty: "hard" },
-      { playerName: "Charlie", attempts: 3, difficulty: "easy" },
-      { playerName: "Dave", attempts: 12, difficulty: "extreme" },
+      { playerName: "Alice", attempts: 5, difficulty: "easy", mode: "normal" },
+      { playerName: "Bob", attempts: 7, difficulty: "hard", mode: "normal" },
+      { playerName: "Charlie", attempts: 3, difficulty: "easy", mode: "normal" },
+      { playerName: "Dave", attempts: 12, difficulty: "extreme", mode: "normal" },
+      { playerName: "Eve", attempts: 8, levelsCleared: 3, difficulty: "easy", mode: "challenge" },
+      { playerName: "Frank", attempts: 6, levelsCleared: 1, difficulty: "hard", mode: "challenge" },
     ],
   });
-  console.log("Seeded 3 scores");
+  console.log("Seeded 6 scores");
 }
 
 main().catch((e) => {
