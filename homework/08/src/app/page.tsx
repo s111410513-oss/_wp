@@ -101,11 +101,13 @@ export default function HomePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ gameId: g.gameId, guess: Number(val), playerName: playerNameRef.current.trim() }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        setGame(null);
+        setGame((prev) => prev ? { ...prev, message: data.error || "發生錯誤" } : prev);
+        setGuess("");
+        setLoading(false);
         return;
       }
-      const data: GuessData = await res.json();
 
       if (data.result === "correct" || data.result === "gameover") {
         setGame({ ...g, message: data.message, gameId: "" });
