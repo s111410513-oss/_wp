@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 type GameData = {
@@ -55,53 +55,85 @@ export default function HomePage() {
   const [guess, setGuess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const startGame = useCallback(async () => {
-    if (!playerName.trim()) return;
-    setLoading(true);
-    const res = await fetch("/api/game/start", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ playerName: playerName.trim(), mode, difficulty }),
-    });
-    const data = await res.json();
-    setGame(data);
-    setGuess("");
-    setLoading(false);
-  }, [playerName, mode, difficulty]);
+  const gameRef = useRef(game);
+  gameRef.current = game;
+  const guessRef = useRef(guess);
+  guessRef.current = guess;
+  const playerNameRef = useRef(playerName);
+  playerNameRef.current = playerName;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const difficultyRef = useRef(difficulty);
+  difficultyRef.current = difficulty;
 
-  const submitGuess = useCallback(async () => {
-    if (!game || !guess.trim()) return;
+  async function handleStartGame() {
+    const name = playerNameRef.current.trim();
+    if (!name) return;
     setLoading(true);
-    const res = await fetch("/api/game/guess", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ gameId: game.gameId, guess: Number(guess), playerName: playerName.trim() }),
-    });
-    const data: GuessData = await res.json();
-
-    if (data.result === "correct" || data.result === "gameover") {
-      setGame({ ...game, message: data.message, gameId: "" });
-    } else if (data.result === "levelup") {
-      setGame({
-        gameId: game.gameId,
-        mode: "challenge",
-        max: data.max!,
-        difficulty: game.difficulty,
-        level: data.level,
-        attemptsLeft: data.attemptsLeft,
-        maxAttempts: data.maxAttempts,
-        message: data.message,
+    try {
+      const res = await fetch("/api/game/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerName: name, mode: modeRef.current, difficulty: difficultyRef.current }),
       });
-    } else {
-      setGame((prev) => prev ? {
-        ...prev,
-        attemptsLeft: data.attemptsLeft ?? prev.attemptsLeft,
-        message: data.message,
-      } : prev);
+      if (!res.ok) {
+        setGame(null);
+        return;
+      }
+      const data = await res.json();
+      setGame(data);
+      setGuess("");
+    } catch {
+      setGame(null);
+    } finally {
+      setLoading(false);
     }
-    setGuess("");
-    setLoading(false);
-  }, [game, guess, playerName]);
+  }
+
+  async function handleSubmitGuess() {
+    const g = gameRef.current;
+    const val = guessRef.current.trim();
+    if (!g || !g.gameId || !val) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/game/guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gameId: g.gameId, guess: Number(val), playerName: playerNameRef.current.trim() }),
+      });
+      if (!res.ok) {
+        setGame(null);
+        return;
+      }
+      const data: GuessData = await res.json();
+
+      if (data.result === "correct" || data.result === "gameover") {
+        setGame({ ...g, message: data.message, gameId: "" });
+      } else if (data.result === "levelup") {
+        setGame({
+          gameId: g.gameId,
+          mode: "challenge",
+          max: data.max!,
+          difficulty: g.difficulty,
+          level: data.level,
+          attemptsLeft: data.attemptsLeft,
+          maxAttempts: data.maxAttempts,
+          message: data.message,
+        });
+      } else {
+        setGame((prev) => prev ? {
+          ...prev,
+          attemptsLeft: data.attemptsLeft ?? prev.attemptsLeft,
+          message: data.message,
+        } : prev);
+      }
+      setGuess("");
+    } catch {
+      setGame(null);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function resetGame() {
     setGame(null);
@@ -130,7 +162,7 @@ export default function HomePage() {
             onChange={(e) => setPlayerName(e.target.value)}
             placeholder="輸入你的名字"
             style={inputStyle}
-            onKeyDown={(e) => e.key === "Enter" && startGame()}
+            onKeyDown={(e) => e.key === "Enter" && handleStartGame()}
           />
 
           <div>
@@ -175,7 +207,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <button onClick={startGame} disabled={loading || !playerName.trim()} style={btnStyle}>
+          <button onClick={handleStartGame} disabled={loading || !playerName.trim()} style={btnStyle}>
             {loading ? "啟動中..." : "開始遊戲"}
           </button>
         </div>
@@ -223,10 +255,10 @@ export default function HomePage() {
                   placeholder={`輸入數字 (1-${game.max})`}
                   type="number" min={1} max={game.max}
                   style={{ ...inputStyle, flex: 1 }}
-                  onKeyDown={(e) => e.key === "Enter" && submitGuess()}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmitGuess()}
                   disabled={loading}
                 />
-                <button onClick={submitGuess} disabled={loading || !guess.trim()} style={btnStyle}>
+                <button onClick={handleSubmitGuess} disabled={loading || !guess.trim()} style={btnStyle}>
                   {loading ? "..." : "猜"}
                 </button>
               </div>
