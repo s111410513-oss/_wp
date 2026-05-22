@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { games } from "@/lib/game-store";
+import { getRange, getMaxAttempts } from "@/lib/challenge";
 
 const NORMAL_DIFFICULTIES: Record<string, number> = {
   easy: 100,
   hard: 500,
   extreme: 2000,
-};
-
-const CHALLENGE_CONFIG: Record<string, { base: number; bonus: number }> = {
-  easy: { base: 20, bonus: 1 },
-  hard: { base: 10, bonus: 2 },
-  extreme: { base: 5, bonus: 3 },
 };
 
 export async function POST(req: NextRequest) {
@@ -23,23 +18,22 @@ export async function POST(req: NextRequest) {
   const gameId = crypto.randomUUID();
 
   if (mode === "challenge") {
-    const config = CHALLENGE_CONFIG[difficulty];
-    if (!config) {
+    if (!["easy", "hard", "extreme"].includes(difficulty)) {
       return NextResponse.json({ error: "Invalid difficulty. Choose: easy, hard, extreme" }, { status: 400 });
     }
 
-    const initialMax = 1000;
-    const number = Math.floor(Math.random() * initialMax) + 1;
+    const level = 1;
+    const max = getRange(level);
+    const maxAttempts = getMaxAttempts(difficulty, level);
+    const number = Math.floor(Math.random() * max) + 1;
 
     games.set(gameId, {
       mode: "challenge",
       number,
-      max: initialMax,
-      level: 1,
-      attemptsLeft: config.base,
-      maxAttempts: config.base,
-      baseAttempts: config.base,
-      bonusPerLevel: config.bonus,
+      max,
+      level,
+      attemptsLeft: maxAttempts,
+      maxAttempts,
       difficulty,
       totalAttempts: 0,
     });
@@ -47,12 +41,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       gameId,
       mode: "challenge",
-      level: 1,
-      max: initialMax,
-      attemptsLeft: config.base,
-      maxAttempts: config.base,
+      level,
+      max,
+      attemptsLeft: maxAttempts,
+      maxAttempts,
       difficulty,
-      message: `Level 1: Guess a number between 1 and ${initialMax}. You have ${config.base} attempt(s).`,
+      message: `Level 1: Guess a number between 1 and ${max}. You have ${maxAttempts} attempt(s).`,
     });
   }
 

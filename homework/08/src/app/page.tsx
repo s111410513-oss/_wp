@@ -46,8 +46,6 @@ const CHALLENGE_DIFFS = [
   { key: "extreme", label: "極度困難", sub: "5 次" },
 ] as const;
 
-const CHALLENGE_ATTEMPT_MAP: Record<string, number> = { easy: 20, hard: 10, extreme: 5 };
-
 export default function HomePage() {
   const router = useRouter();
   const [playerName, setPlayerName] = useState("");
@@ -209,7 +207,7 @@ export default function HomePage() {
             <>
               {game.mode === "challenge" && (
                 <p style={{ color: "#722ed1", fontWeight: 600 }}>
-                  剩餘嘗試：{game.attemptsLeft} / {game.maxAttempts ?? CHALLENGE_ATTEMPT_MAP[game.difficulty]} 次
+                  剩餘嘗試：{game.attemptsLeft} / {game.maxAttempts} 次
                 </p>
               )}
               <div style={{ display: "flex", gap: "0.5rem" }}>

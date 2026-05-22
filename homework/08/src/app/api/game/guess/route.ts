@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { games, type ChallengeGame } from "@/lib/game-store";
+import { getRange, getMaxAttempts } from "@/lib/challenge";
 
 export async function POST(req: NextRequest) {
   const { gameId, guess, playerName } = await req.json();
@@ -23,8 +24,8 @@ export async function POST(req: NextRequest) {
 
     if (n === cg.number) {
       const nextLevel = cg.level + 1;
-      const nextMax = cg.max + 255;
-      const nextMaxAttempts = cg.baseAttempts + (nextLevel - 1) * cg.bonusPerLevel;
+      const nextMax = getRange(nextLevel);
+      const nextMaxAttempts = getMaxAttempts(cg.difficulty, nextLevel);
       const nextNumber = Math.floor(Math.random() * nextMax) + 1;
 
       games.set(gameId, {
