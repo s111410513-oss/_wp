@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     hint = isPrime(cg.number) ? "是質數 (Prime)" : "不是質數 (Not Prime)";
   } else if (hintType === "range") {
     const third = Math.ceil(cg.max / 3);
-    if (cg.number <= third) hint = `1 ~ ${third}`;
+    if (cg.number <= third) hint = `0 ~ ${third}`;
     else if (cg.number <= third * 2) hint = `${third + 1} ~ ${third * 2}`;
     else hint = `${third * 2 + 1} ~ ${cg.max}`;
   }

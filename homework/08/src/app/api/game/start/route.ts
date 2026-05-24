@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const level = 1;
     const max = getRange(level);
     const maxAttempts = getMaxAttempts(difficulty, level);
-    const number = Math.floor(Math.random() * max) + 1;
+    const number = Math.floor(Math.random() * (max + 1));
 
     const now = Date.now();
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       hintsLeft: 3,
       totalAttempts: 0,
       startedAt: now,
-      message: `Level 1: Guess a number between 1 and ${max}. You have ${maxAttempts} attempt(s).`,
+      message: `Level 1: Guess a number between 0 and ${max}. You have ${maxAttempts} attempt(s).`,
     });
   }
 
@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
 
   if (difficulty === "custom") {
     const parsed = Number(customMax);
-    if (!Number.isInteger(parsed) || parsed < 2) {
-      return NextResponse.json({ error: "Custom range must be an integer ≥ 2" }, { status: 400 });
+    if (!Number.isInteger(parsed) || parsed < 1) {
+      return NextResponse.json({ error: "Custom range must be a positive integer" }, { status: 400 });
     }
     max = parsed;
   } else if (!max) {
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
   }
 
   const now = Date.now();
-  const number = Math.floor(Math.random() * max) + 1;
+  const number = Math.floor(Math.random() * (max + 1));
 
   games.set(gameId, {
     mode: "normal",
@@ -87,6 +87,6 @@ export async function POST(req: NextRequest) {
     max,
     difficulty,
     startedAt: now,
-    message: `[${difficulty.toUpperCase()}] Guess a number between 1 and ${max}, ${playerName}!`,
+    message: `[${difficulty.toUpperCase()}] Guess a number between 0 and ${max}, ${playerName}!`,
   });
 }

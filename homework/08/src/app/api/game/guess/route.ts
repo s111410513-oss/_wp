@@ -44,8 +44,8 @@ export async function POST(req: NextRequest) {
   }
 
   const n = Number(guess);
-  if (!Number.isInteger(n) || n < 1 || n > game.max) {
-    return NextResponse.json({ error: `Guess must be an integer between 1 and ${game.max}` }, { status: 400 });
+  if (!Number.isInteger(n) || n < 0 || n > game.max) {
+    return NextResponse.json({ error: `Guess must be an integer between 0 and ${game.max}` }, { status: 400 });
   }
 
   if (game.mode === "challenge") {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       const nextLevel = cg.level + 1;
       const nextMax = getRange(nextLevel);
       const nextMaxAttempts = getMaxAttempts(cg.difficulty, nextLevel);
-      const nextNumber = Math.floor(Math.random() * nextMax) + 1;
+      const nextNumber = Math.floor(Math.random() * (nextMax + 1));
 
       games.set(gameId, {
         ...cg,
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
         hintsLeft: cg.hintsLeft,
         totalAttempts: cg.totalAttempts,
         cleared: cg.level,
-        message: `Level ${cg.level} cleared! Now Level ${nextLevel} (1-${nextMax}). You have ${nextMaxAttempts} attempt(s).`,
+        message: `Level ${cg.level} cleared! Now Level ${nextLevel} (0-${nextMax}). You have ${nextMaxAttempts} attempt(s).`,
       });
     }
 
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
       temperatureLabel: temp.label,
       temperatureColor: temp.color,
       distance: dist,
-      message: `${temp.label}！${dir} ${n} (1-${cg.max})　剩 ${cg.attemptsLeft} 次`,
+      message: `${temp.label}！${dir} ${n} (0-${cg.max})　剩 ${cg.attemptsLeft} 次`,
     });
   }
 
@@ -161,6 +161,6 @@ export async function POST(req: NextRequest) {
     temperatureLabel: temp.label,
     temperatureColor: temp.color,
     distance: dist,
-    message: `${temp.label}！${dir} ${n} (1-${game.max})　第 ${game.attempts} 次`,
+    message: `${temp.label}！${dir} ${n} (0-${game.max})　第 ${game.attempts} 次`,
   });
 }

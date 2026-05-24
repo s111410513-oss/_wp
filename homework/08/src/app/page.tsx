@@ -53,9 +53,9 @@ const MODES = [
 ] as const;
 
 const NORMAL_DIFFS = [
-  { key: "easy", label: "簡單", sub: "1-100" },
-  { key: "hard", label: "困難", sub: "1-500" },
-  { key: "extreme", label: "超困難", sub: "1-2000" },
+  { key: "easy", label: "簡單", sub: "0-100" },
+  { key: "hard", label: "困難", sub: "0-500" },
+  { key: "extreme", label: "超困難", sub: "0-2000" },
   { key: "custom", label: "自訂", sub: "自訂範圍" },
 ] as const;
 
@@ -480,8 +480,8 @@ export default function HomePage() {
                 <input
                   value={guess}
                   onChange={(e) => setGuess(e.target.value)}
-                  placeholder={`輸入數字 (1-${game.max})`}
-                  type="number" min={1} max={game.max}
+                  placeholder={`輸入數字 (0-${game.max})`}
+                  type="number" min={0} max={game.max}
                   style={{ ...inputStyle, flex: 1 }}
                   onKeyDown={(e) => e.key === "Enter" && handleSubmitGuess()}
                   disabled={loading}
