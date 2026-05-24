@@ -18,6 +18,7 @@ type GameData = {
   message: string;
   temperatureLabel?: string;
   temperatureColor?: string;
+  distance?: number;
 };
 
 type GuessData = {
@@ -215,6 +216,7 @@ export default function HomePage() {
           totalAttempts: data.totalAttempts ?? prev.totalAttempts,
           temperatureLabel: data.temperatureLabel ?? prev.temperatureLabel,
           temperatureColor: data.temperatureColor ?? prev.temperatureColor,
+          distance: data.distance ?? prev.distance,
           message: data.message,
         } : prev);
       }
@@ -432,11 +434,16 @@ export default function HomePage() {
           </div>
 
           {game.temperatureLabel && (
-            <div style={{
-              textAlign: "center", fontSize: "2rem", fontWeight: 800,
-              color: game.temperatureColor, letterSpacing: "0.05em",
-            }}>
-              {game.temperatureLabel}
+            <div style={{ textAlign: "center" }}>
+              <span style={{
+                fontSize: "2rem", fontWeight: 800,
+                color: game.temperatureColor, letterSpacing: "0.05em",
+              }}>
+                {game.temperatureLabel}
+              </span>
+              <div style={{ fontSize: "0.85rem", color: "#888", marginTop: "0.2rem" }}>
+                距離 {game.distance}
+              </div>
             </div>
           )}
 

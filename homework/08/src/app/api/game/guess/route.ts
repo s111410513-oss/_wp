@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
 
     const dist = Math.abs(n - cg.number);
     const temp = getTemperature(dist);
-    const dir = n < cg.number ? "↑" : "↓";
+    const dir = n < cg.number ? "Higher" : "Lower";
     return NextResponse.json({
       result: n < cg.number ? "higher" : "lower",
       mode: "challenge",
@@ -120,7 +120,8 @@ export async function POST(req: NextRequest) {
       totalAttempts: cg.totalAttempts,
       temperatureLabel: temp.label,
       temperatureColor: temp.color,
-      message: `${temp.label} ${dir} (1-${cg.max})　剩 ${cg.attemptsLeft} 次`,
+      distance: dist,
+      message: `${temp.label}！${dir} (距離 ${dist}) (1-${cg.max})　剩 ${cg.attemptsLeft} 次`,
     });
   }
 
@@ -151,7 +152,7 @@ export async function POST(req: NextRequest) {
 
   const dist = Math.abs(n - game.number);
   const temp = getTemperature(dist);
-  const dir = n < game.number ? "↑" : "↓";
+  const dir = n < game.number ? "Higher" : "Lower";
   return NextResponse.json({
     result: n < game.number ? "higher" : "lower",
     mode: "normal",
@@ -159,6 +160,7 @@ export async function POST(req: NextRequest) {
     difficulty: game.difficulty,
     temperatureLabel: temp.label,
     temperatureColor: temp.color,
-    message: `${temp.label} ${dir} (1-${game.max})　第 ${game.attempts} 次`,
+    distance: dist,
+    message: `${temp.label}！${dir} (距離 ${dist}) (1-${game.max})　第 ${game.attempts} 次`,
   });
 }
