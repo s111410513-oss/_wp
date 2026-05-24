@@ -9,7 +9,7 @@ const NORMAL_DIFFICULTIES: Record<string, number> = {
 };
 
 export async function POST(req: NextRequest) {
-  const { playerName, mode = "normal", difficulty = "easy" } = await req.json();
+  const { playerName, mode = "normal", difficulty = "easy", customMax } = await req.json();
 
   if (!playerName || typeof playerName !== "string" || playerName.trim().length === 0) {
     return NextResponse.json({ error: "playerName is required" }, { status: 400 });
@@ -57,9 +57,16 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const max = NORMAL_DIFFICULTIES[difficulty];
-  if (!max) {
-    return NextResponse.json({ error: "Invalid difficulty. Choose: easy, hard, extreme" }, { status: 400 });
+  let max = NORMAL_DIFFICULTIES[difficulty];
+
+  if (difficulty === "custom") {
+    const parsed = Number(customMax);
+    if (!Number.isInteger(parsed) || parsed < 2) {
+      return NextResponse.json({ error: "Custom range must be an integer ≥ 2" }, { status: 400 });
+    }
+    max = parsed;
+  } else if (!max) {
+    return NextResponse.json({ error: "Invalid difficulty. Choose: easy, hard, extreme, custom" }, { status: 400 });
   }
 
   const now = Date.now();

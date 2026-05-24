@@ -56,6 +56,7 @@ const NORMAL_DIFFS = [
   { key: "easy", label: "簡單", sub: "1-100" },
   { key: "hard", label: "困難", sub: "1-500" },
   { key: "extreme", label: "超困難", sub: "1-2000" },
+  { key: "custom", label: "自訂", sub: "自訂範圍" },
 ] as const;
 
 const CHALLENGE_DIFFS = [
@@ -82,6 +83,7 @@ export default function HomePage() {
   const [idleTime, setIdleTime] = useState(0);
   const [idleWarning, setIdleWarning] = useState(false);
   const [result, setResult] = useState<ResultData | null>(null);
+  const [customMax, setCustomMax] = useState("");
 
   const gameRef = useRef(game);
   gameRef.current = game;
@@ -94,6 +96,8 @@ export default function HomePage() {
   modeRef.current = mode;
   const difficultyRef = useRef(difficulty);
   difficultyRef.current = difficulty;
+  const customMaxRef = useRef(customMax);
+  customMaxRef.current = customMax;
 
   useEffect(() => {
     if (!game || !game.startedAt || !game.gameId) return;
@@ -143,10 +147,14 @@ export default function HomePage() {
     if (!name) return;
     setLoading(true);
     try {
+      const diff = difficultyRef.current;
+      const body: Record<string, unknown> = { playerName: name, mode: modeRef.current, difficulty: diff };
+      if (diff === "custom") body.customMax = Number(customMaxRef.current);
+
       const res = await fetch("/api/game/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerName: name, mode: modeRef.current, difficulty: difficultyRef.current }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         setGame(null);
@@ -259,6 +267,7 @@ export default function HomePage() {
     setTimeLeft(0);
     setIdleTime(0);
     setIdleWarning(false);
+    setCustomMax("");
   }
 
   function forceReset() {
@@ -271,10 +280,11 @@ export default function HomePage() {
     setTimeLeft(0);
     setIdleTime(0);
     setIdleWarning(false);
+    setCustomMax("");
   }
 
   const diffs = mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS;
-  const diffLabels: Record<string, string> = { easy: "#52c41a", hard: "#fa8c16", extreme: "#f5222d" };
+  const diffLabels: Record<string, string> = { easy: "#52c41a", hard: "#fa8c16", extreme: "#f5222d", custom: "#1677ff" };
 
   return (
     <main style={{ maxWidth: 600, margin: "0 auto", padding: "2rem 1rem" }}>
@@ -354,7 +364,7 @@ export default function HomePage() {
               {MODES.map((m) => (
                 <button
                   key={m.key}
-                  onClick={() => { setMode(m.key); setDifficulty("easy"); }}
+                  onClick={() => { setMode(m.key); setDifficulty("easy"); setCustomMax(""); }}
                   style={{
                     ...btnStyle, flex: 1,
                     background: mode === m.key ? "#1677ff" : "#e0e0e0",
@@ -390,7 +400,22 @@ export default function HomePage() {
             </div>
           </div>
 
-          <button onClick={handleStartGame} disabled={loading || !playerName.trim()} style={btnStyle}>
+          {mode === "normal" && difficulty === "custom" && (
+            <div>
+              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>自訂最大範圍</label>
+              <input
+                value={customMax}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (/^\d*$/.test(v)) setCustomMax(v);
+                }}
+                placeholder="輸入正整數（≥ 2）"
+                style={inputStyle}
+              />
+            </div>
+          )}
+
+          <button onClick={handleStartGame} disabled={loading || !playerName.trim() || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
             {loading ? "啟動中..." : "開始遊戲"}
           </button>
         </div>
