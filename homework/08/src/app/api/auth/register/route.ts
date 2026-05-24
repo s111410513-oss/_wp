@@ -25,5 +25,5 @@ export async function POST(req: NextRequest) {
     data: { username: name, password: hash },
   });
 
-  return NextResponse.json({ username: name, message: "Registration successful" });
+  return NextResponse.json({ username: name, title: "初心者", message: "Registration successful" });
 }

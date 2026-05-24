@@ -89,6 +89,8 @@ export default function HomePage() {
   const [authUser, setAuthUser] = useState("");
   const [authPass, setAuthPass] = useState("");
   const [authMsg, setAuthMsg] = useState("");
+  const [userTitle, setUserTitle] = useState("");
+  const [showTitles, setShowTitles] = useState(false);
 
   const gameRef = useRef(game);
   gameRef.current = game;
@@ -105,6 +107,8 @@ export default function HomePage() {
   customMaxRef.current = customMax;
   const isLoggedInRef = useRef(isLoggedIn);
   isLoggedInRef.current = isLoggedIn;
+  const userTitleRef = useRef(userTitle);
+  userTitleRef.current = userTitle;
 
   useEffect(() => {
     if (!game || !game.startedAt || !game.gameId) return;
@@ -305,6 +309,7 @@ export default function HomePage() {
         setAuthMsg(data.error || "操作失敗");
       } else {
         setPlayerName(authUser.trim());
+        setUserTitle(data.title || "初心者");
         setIsLoggedIn(true);
         setShowAuth(null);
         setAuthUser("");
@@ -406,11 +411,27 @@ export default function HomePage() {
           ) : (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <h2 style={{ margin: 0 }}>👋 {playerName}</h2>
-                <button onClick={() => { setIsLoggedIn(false); setPlayerName(""); }}
-                  style={{ ...btnStyle, fontSize: "0.85rem", padding: "0.3rem 0.8rem", background: "#f5222d" }}>
-                  登出
-                </button>
+                <div>
+                  <h2 style={{ margin: 0 }}>👋 {playerName}</h2>
+                  {userTitle && (
+                    <span style={{
+                      fontSize: "0.8rem", color: "#888", fontWeight: 500,
+                      background: "#f0f0f0", padding: "0.1rem 0.5rem", borderRadius: 8,
+                    }}>
+                      {userTitle}
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: "0.4rem" }}>
+                  <button onClick={() => setShowTitles(true)}
+                    style={{ ...btnStyle, fontSize: "0.85rem", padding: "0.3rem 0.8rem", background: "#722ed1" }}>
+                    稱號
+                  </button>
+                  <button onClick={() => { setIsLoggedIn(false); setPlayerName(""); setUserTitle(""); }}
+                    style={{ ...btnStyle, fontSize: "0.85rem", padding: "0.3rem 0.8rem", background: "#f5222d" }}>
+                    登出
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -485,6 +506,14 @@ export default function HomePage() {
                 background: "#888",
               }}>← 大廳</button>
               <h2 style={{ margin: 0 }}>{playerName}</h2>
+              {userTitle && (
+                <span style={{
+                  fontSize: "0.75rem", color: "#888", fontWeight: 500,
+                  background: "#f0f0f0", padding: "0.1rem 0.4rem", borderRadius: 6, marginLeft: "0.3rem",
+                }}>
+                  {userTitle}
+                </span>
+              )}
             </div>
             <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
               {game.mode === "challenge" && (
@@ -581,6 +610,45 @@ export default function HomePage() {
               再玩一次
             </button>
           )}
+        </div>
+      )}
+
+      {showTitles && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+        }}>
+          <div style={{ ...cardStyle, width: 340 }}>
+            <h3 style={{ margin: 0 }}>稱號列表</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              {["管理員", "初心者", "挑戰者", "神之一筆"].map((t) => (
+                <button
+                  key={t}
+                  onClick={async () => {
+                    const res = await fetch("/api/titles/set", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ username: playerName, title: t }),
+                    });
+                    if (res.ok) {
+                      setUserTitle(t);
+                      setShowTitles(false);
+                    }
+                  }}
+                  style={{
+                    ...btnStyle, textAlign: "left", background: userTitle === t ? "#1677ff" : "#f0f0f0",
+                    color: userTitle === t ? "white" : "#333", fontWeight: userTitle === t ? 700 : 500,
+                  }}
+                >
+                  {t} {userTitle === t && "✓"}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setShowTitles(false)}
+              style={{ ...btnStyle, background: "#888" }}>
+              關閉
+            </button>
+          </div>
         </div>
       )}
 
