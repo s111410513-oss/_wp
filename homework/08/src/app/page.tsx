@@ -434,16 +434,9 @@ export default function HomePage() {
           </div>
 
           {game.temperatureLabel && (
-            <div style={{ textAlign: "center" }}>
-              <span style={{
-                fontSize: "2rem", fontWeight: 800,
-                color: game.temperatureColor, letterSpacing: "0.05em",
-              }}>
-                {game.temperatureLabel}
-              </span>
-              <div style={{ fontSize: "0.85rem", color: "#888", marginTop: "0.2rem" }}>
-                距離 {game.distance}
-              </div>
+            <div style={{ fontSize: "2rem", fontWeight: 800, textAlign: "center",
+              color: game.temperatureColor, letterSpacing: "0.05em" }}>
+              {game.temperatureLabel}
             </div>
           )}
 

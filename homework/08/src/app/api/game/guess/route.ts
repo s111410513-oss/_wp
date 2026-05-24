@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
       temperatureLabel: temp.label,
       temperatureColor: temp.color,
       distance: dist,
-      message: `${temp.label}！${dir} (距離 ${dist}) (1-${cg.max})　剩 ${cg.attemptsLeft} 次`,
+      message: `${temp.label}！${dir} ${n} (1-${cg.max})　剩 ${cg.attemptsLeft} 次`,
     });
   }
 
@@ -161,6 +161,6 @@ export async function POST(req: NextRequest) {
     temperatureLabel: temp.label,
     temperatureColor: temp.color,
     distance: dist,
-    message: `${temp.label}！${dir} (距離 ${dist}) (1-${game.max})　第 ${game.attempts} 次`,
+    message: `${temp.label}！${dir} ${n} (1-${game.max})　第 ${game.attempts} 次`,
   });
 }
