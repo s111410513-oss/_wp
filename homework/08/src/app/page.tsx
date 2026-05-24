@@ -84,6 +84,11 @@ export default function HomePage() {
   const [idleWarning, setIdleWarning] = useState(false);
   const [result, setResult] = useState<ResultData | null>(null);
   const [customMax, setCustomMax] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuth, setShowAuth] = useState<"register" | "login" | null>(null);
+  const [authUser, setAuthUser] = useState("");
+  const [authPass, setAuthPass] = useState("");
+  const [authMsg, setAuthMsg] = useState("");
 
   const gameRef = useRef(game);
   gameRef.current = game;
@@ -98,6 +103,8 @@ export default function HomePage() {
   difficultyRef.current = difficulty;
   const customMaxRef = useRef(customMax);
   customMaxRef.current = customMax;
+  const isLoggedInRef = useRef(isLoggedIn);
+  isLoggedInRef.current = isLoggedIn;
 
   useEffect(() => {
     if (!game || !game.startedAt || !game.gameId) return;
@@ -142,8 +149,8 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [game]);
 
-  async function handleStartGame() {
-    const name = playerNameRef.current.trim();
+  async function handleStartGame(guestName?: string) {
+    const name = guestName || playerNameRef.current.trim();
     if (!name) return;
     setLoading(true);
     try {
@@ -180,7 +187,7 @@ export default function HomePage() {
       const res = await fetch("/api/game/guess", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gameId: g.gameId, guess: Number(val), playerName: playerNameRef.current.trim() }),
+        body: JSON.stringify({ gameId: g.gameId, guess: Number(val), playerName: isLoggedInRef.current ? playerNameRef.current.trim() : "" }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -283,6 +290,34 @@ export default function HomePage() {
     setCustomMax("");
   }
 
+  async function handleAuth() {
+    if (!showAuth || !authUser.trim() || authPass.length < 3) return;
+    setLoading(true);
+    setAuthMsg("");
+    try {
+      const res = await fetch(`/api/auth/${showAuth}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: authUser.trim(), password: authPass }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAuthMsg(data.error || "操作失敗");
+      } else {
+        setPlayerName(authUser.trim());
+        setIsLoggedIn(true);
+        setShowAuth(null);
+        setAuthUser("");
+        setAuthPass("");
+        setAuthMsg("");
+      }
+    } catch {
+      setAuthMsg("網路錯誤");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const diffs = mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS;
   const diffLabels: Record<string, string> = { easy: "#52c41a", hard: "#fa8c16", extreme: "#f5222d", custom: "#1677ff" };
 
@@ -349,75 +384,97 @@ export default function HomePage() {
               ⚠ 閒置超過 2 分鐘，再 1 分鐘後將自動關閉遊戲
             </div>
           )}
-          <h2>開始新遊戲</h2>
-          <input
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="輸入你的名字"
-            style={inputStyle}
-            onKeyDown={(e) => e.key === "Enter" && handleStartGame()}
-          />
 
-          <div>
-            <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>遊戲模式</label>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              {MODES.map((m) => (
-                <button
-                  key={m.key}
-                  onClick={() => { setMode(m.key); setDifficulty("easy"); setCustomMax(""); }}
-                  style={{
-                    ...btnStyle, flex: 1,
-                    background: mode === m.key ? "#1677ff" : "#e0e0e0",
-                    color: mode === m.key ? "white" : "#333",
-                  }}
-                >
-                  {m.label}
-                  <br /><small>{m.desc}</small>
+          {!isLoggedIn ? (
+            <>
+              <h2 style={{ margin: 0 }}>訪客模式</h2>
+              <p style={{ color: "#888", fontSize: "0.9rem" }}>
+                名稱：unknown（不計分數）
+              </p>
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button onClick={() => handleStartGame("unknown")} disabled={loading} style={{ ...btnStyle, flex: 1 }}>
+                  {loading ? "啟動中..." : "🎮 訪客遊玩"}
                 </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
-              {mode === "normal" ? "難度（範圍）" : "難度（嘗試次數）"}
-            </label>
-            <div style={{ display: "flex", gap: "0.5rem" }}>
-              {(mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS).map((d) => (
-                <button
-                  key={d.key}
-                  onClick={() => setDifficulty(d.key)}
-                  style={{
-                    ...btnStyle, flex: 1,
-                    background: difficulty === d.key ? "#1677ff" : "#e0e0e0",
-                    color: difficulty === d.key ? "white" : "#333",
-                  }}
-                >
-                  {d.label}
-                  <br /><small>({d.sub})</small>
+                <button onClick={() => setShowAuth("register")} style={{ ...btnStyle, flex: 1, background: "#52c41a" }}>
+                  📝 註冊
                 </button>
-              ))}
-            </div>
-          </div>
+                <button onClick={() => setShowAuth("login")} style={{ ...btnStyle, flex: 1, background: "#1677ff" }}>
+                  🔑 登入
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <h2 style={{ margin: 0 }}>👋 {playerName}</h2>
+                <button onClick={() => { setIsLoggedIn(false); setPlayerName(""); }}
+                  style={{ background: "none", border: "none", color: "#888", cursor: "pointer", fontWeight: 500 }}>
+                  登出
+                </button>
+              </div>
 
-          {mode === "normal" && difficulty === "custom" && (
-            <div>
-              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>自訂最大範圍</label>
-              <input
-                value={customMax}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (/^\d*$/.test(v)) setCustomMax(v);
-                }}
-                placeholder="輸入正整數（≥ 2）"
-                style={inputStyle}
-              />
-            </div>
+              <div>
+                <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>遊戲模式</label>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {MODES.map((m) => (
+                    <button
+                      key={m.key}
+                      onClick={() => { setMode(m.key); setDifficulty("easy"); setCustomMax(""); }}
+                      style={{
+                        ...btnStyle, flex: 1,
+                        background: mode === m.key ? "#1677ff" : "#e0e0e0",
+                        color: mode === m.key ? "white" : "#333",
+                      }}
+                    >
+                      {m.label}
+                      <br /><small>{m.desc}</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
+                  {mode === "normal" ? "難度（範圍）" : "難度（嘗試次數）"}
+                </label>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {(mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS).map((d) => (
+                    <button
+                      key={d.key}
+                      onClick={() => setDifficulty(d.key)}
+                      style={{
+                        ...btnStyle, flex: 1,
+                        background: difficulty === d.key ? "#1677ff" : "#e0e0e0",
+                        color: difficulty === d.key ? "white" : "#333",
+                      }}
+                    >
+                      {d.label}
+                      <br /><small>({d.sub})</small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {mode === "normal" && difficulty === "custom" && (
+                <div>
+                  <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>自訂最大範圍</label>
+                  <input
+                    value={customMax}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (/^\d*$/.test(v)) setCustomMax(v);
+                    }}
+                    placeholder="輸入正整數（≥ 2）"
+                    style={inputStyle}
+                  />
+                </div>
+              )}
+
+              <button onClick={() => handleStartGame()} disabled={loading || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
+                {loading ? "啟動中..." : "開始遊戲"}
+              </button>
+            </>
           )}
-
-          <button onClick={handleStartGame} disabled={loading || !playerName.trim() || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
-            {loading ? "啟動中..." : "開始遊戲"}
-          </button>
         </div>
       ) : (
         <div style={cardStyle}>
@@ -524,6 +581,42 @@ export default function HomePage() {
               再玩一次
             </button>
           )}
+        </div>
+      )}
+
+      {showAuth && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+        }}>
+          <div style={{ ...cardStyle, width: 340 }}>
+            <h3 style={{ margin: 0 }}>{showAuth === "register" ? "註冊帳號" : "登入"}</h3>
+            <input
+              value={authUser}
+              onChange={(e) => setAuthUser(e.target.value)}
+              placeholder="遊戲名稱"
+              style={inputStyle}
+            />
+            <input
+              value={authPass}
+              onChange={(e) => setAuthPass(e.target.value)}
+              placeholder="密碼（至少 3 碼）"
+              type="password"
+              style={inputStyle}
+              onKeyDown={(e) => e.key === "Enter" && handleAuth()}
+            />
+            {authMsg && <p style={{ color: "#f5222d", fontSize: "0.85rem", margin: 0 }}>{authMsg}</p>}
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              <button onClick={handleAuth} disabled={loading || !authUser.trim() || authPass.length < 3}
+                style={{ ...btnStyle, flex: 1 }}>
+                {loading ? "處理中..." : "確認"}
+              </button>
+              <button onClick={() => { setShowAuth(null); setAuthUser(""); setAuthPass(""); setAuthMsg(""); }}
+                style={{ ...btnStyle, flex: 1, background: "#888" }}>
+                取消
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>
