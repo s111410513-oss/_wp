@@ -621,28 +621,35 @@ export default function HomePage() {
           <div style={{ ...cardStyle, width: 340 }}>
             <h3 style={{ margin: 0 }}>稱號列表</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              {["管理員", "初心者", "挑戰者", "神之一筆"].map((t) => (
-                <button
-                  key={t}
-                  onClick={async () => {
-                    const res = await fetch("/api/titles/set", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ username: playerName, title: t }),
-                    });
-                    if (res.ok) {
-                      setUserTitle(t);
-                      setShowTitles(false);
-                    }
-                  }}
-                  style={{
-                    ...btnStyle, textAlign: "left", background: userTitle === t ? "#1677ff" : "#f0f0f0",
-                    color: userTitle === t ? "white" : "#333", fontWeight: userTitle === t ? 700 : 500,
-                  }}
-                >
-                  {t} {userTitle === t && "✓"}
-                </button>
-              ))}
+              {["管理員", "初心者", "挑戰者", "神之一筆"].map((t) => {
+                const locked = t === "管理員" && playerName !== "King";
+                return (
+                  <button
+                    key={t}
+                    disabled={locked}
+                    onClick={async () => {
+                      if (locked) return;
+                      const res = await fetch("/api/titles/set", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ username: playerName, title: t }),
+                      });
+                      if (res.ok) {
+                        setUserTitle(t);
+                        setShowTitles(false);
+                      }
+                    }}
+                    style={{
+                      ...btnStyle, textAlign: "left",
+                      background: userTitle === t ? "#1677ff" : locked ? "#e0e0e0" : "#f0f0f0",
+                      color: userTitle === t ? "white" : locked ? "#bbb" : "#333",
+                      fontWeight: userTitle === t ? 700 : 500, cursor: locked ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {t} {userTitle === t && "✓"} {locked && " 🔒"}
+                  </button>
+                );
+              })}
             </div>
             <button onClick={() => setShowTitles(false)}
               style={{ ...btnStyle, background: "#888" }}>

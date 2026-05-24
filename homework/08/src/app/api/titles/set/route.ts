@@ -18,6 +18,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
+  if (title === "管理員" && username.trim() !== "King") {
+    return NextResponse.json({ error: "Only King can use this title" }, { status: 403 });
+  }
+
   await prisma.user.update({
     where: { username: username.trim() },
     data: { title },
