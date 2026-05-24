@@ -3,6 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { games, type ChallengeGame } from "@/lib/game-store";
 import { getRange, getMaxAttempts } from "@/lib/challenge";
 
+function getTemperature(dist: number): { label: string; color: string } {
+  if (dist <= 5) return { label: "超燙", color: "#f5222d" };
+  if (dist <= 20) return { label: "很接近", color: "#fa8c16" };
+  if (dist <= 50) return { label: "普通", color: "#1677ff" };
+  return { label: "很遠", color: "#888" };
+}
+
 export async function POST(req: NextRequest) {
   const { gameId, guess, playerName } = await req.json();
 
@@ -100,6 +107,9 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    const dist = Math.abs(n - cg.number);
+    const temp = getTemperature(dist);
+    const dir = n < cg.number ? "↑" : "↓";
     return NextResponse.json({
       result: n < cg.number ? "higher" : "lower",
       mode: "challenge",
@@ -108,9 +118,9 @@ export async function POST(req: NextRequest) {
       attemptsLeft: cg.attemptsLeft,
       hintsLeft: cg.hintsLeft,
       totalAttempts: cg.totalAttempts,
-      message: n < cg.number
-        ? `Higher than ${n} (1-${cg.max}). ${cg.attemptsLeft} attempt(s) left.`
-        : `Lower than ${n} (1-${cg.max}). ${cg.attemptsLeft} attempt(s) left.`,
+      temperatureLabel: temp.label,
+      temperatureColor: temp.color,
+      message: `${temp.label} ${dir} (1-${cg.max})　剩 ${cg.attemptsLeft} 次`,
     });
   }
 
@@ -139,11 +149,16 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const dist = Math.abs(n - game.number);
+  const temp = getTemperature(dist);
+  const dir = n < game.number ? "↑" : "↓";
   return NextResponse.json({
     result: n < game.number ? "higher" : "lower",
     mode: "normal",
     attempts: game.attempts,
     difficulty: game.difficulty,
-    message: n < game.number ? `Higher than ${n} (1-${game.max})` : `Lower than ${n} (1-${game.max})`,
+    temperatureLabel: temp.label,
+    temperatureColor: temp.color,
+    message: `${temp.label} ${dir} (1-${game.max})　第 ${game.attempts} 次`,
   });
 }

@@ -16,6 +16,8 @@ type GameData = {
   totalAttempts?: number;
   startedAt: number;
   message: string;
+  temperatureLabel?: string;
+  temperatureColor?: string;
 };
 
 type GuessData = {
@@ -211,6 +213,8 @@ export default function HomePage() {
           attemptsLeft: data.attemptsLeft ?? prev.attemptsLeft,
           hintsLeft: data.hintsLeft ?? prev.hintsLeft,
           totalAttempts: data.totalAttempts ?? prev.totalAttempts,
+          temperatureLabel: data.temperatureLabel ?? prev.temperatureLabel,
+          temperatureColor: data.temperatureColor ?? prev.temperatureColor,
           message: data.message,
         } : prev);
       }
@@ -427,7 +431,18 @@ export default function HomePage() {
             )}
           </div>
 
-          <p style={{ fontSize: "1.2rem", fontWeight: 500 }}>{game.message}</p>
+          {game.temperatureLabel && (
+            <div style={{
+              textAlign: "center", fontSize: "2rem", fontWeight: 800,
+              color: game.temperatureColor, letterSpacing: "0.05em",
+            }}>
+              {game.temperatureLabel}
+            </div>
+          )}
+
+          <p style={{ fontSize: game.temperatureLabel ? "0.9rem" : "1.2rem", color: "#555", fontWeight: 500 }}>
+            {game.message}
+          </p>
 
           {game.gameId && (
             <>
