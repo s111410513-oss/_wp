@@ -260,6 +260,7 @@ export default function HomePage() {
     setMode("normal");
     setDifficulty("easy");
     setGame(null);
+    setResult(null);
     setGuess("");
     setTimeLeft(0);
     setIdleTime(0);

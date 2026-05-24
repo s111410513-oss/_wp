@@ -22,4 +22,6 @@ export interface ChallengeGame {
 
 export type GameState = NormalGame | ChallengeGame;
 
-export const games = new Map<string, GameState>();
+const globalForGames = globalThis as unknown as { games: Map<string, GameState> };
+export const games = globalForGames.games ?? new Map<string, GameState>();
+if (process.env.NODE_ENV !== "production") globalForGames.games = games;
