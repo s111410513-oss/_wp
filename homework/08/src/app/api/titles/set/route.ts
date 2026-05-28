@@ -18,8 +18,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  if (title === "管理員" && username.trim() !== "King") {
+  const name = username.trim();
+
+  if (title === "管理員" && name !== "King") {
     return NextResponse.json({ error: "Only King can use this title" }, { status: 403 });
+  }
+
+  if (title === "挑戰者" && name !== "King") {
+    if (!user.challengerUnlocked) {
+      return NextResponse.json({ error: "Title locked. Play challenge mode to unlock." }, { status: 403 });
+    }
+  }
+
+  if (title === "神之一筆" && name !== "King") {
+    if (!user.godlyUnlocked) {
+      return NextResponse.json({ error: "Title locked. Guess correctly in 1 attempt to unlock." }, { status: 403 });
+    }
   }
 
   await prisma.user.update({

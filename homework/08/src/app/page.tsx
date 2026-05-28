@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { playCorrect, playWrong, playLevelUp, playGameOver, playTimeout, playHint } from "@/lib/sound";
 
 type GameData = {
   gameId: string;
@@ -19,6 +20,7 @@ type GameData = {
   temperatureLabel?: string;
   temperatureColor?: string;
   distance?: number;
+  hintMessage?: string;
 };
 
 type GuessData = {
@@ -67,8 +69,8 @@ const CHALLENGE_DIFFS = [
 
 const HINTS = [
   { key: "oddEven", label: "奇數/偶數" },
-  { key: "prime", label: "是否為質數" },
-  { key: "range", label: "大約區間" },
+  { key: "halfRange", label: "大小區間" },
+  { key: "lastDigit", label: "個位數字" },
 ] as const;
 
 export default function HomePage() {
@@ -91,7 +93,41 @@ export default function HomePage() {
   const [authMsg, setAuthMsg] = useState("");
   const [userTitle, setUserTitle] = useState("");
   const [showTitles, setShowTitles] = useState(false);
+  const [unlockedTitles, setUnlockedTitles] = useState<string[]>([]);
+  const [newUnlocks, setNewUnlocks] = useState<string[]>([]);
+  const [newAchievements, setNewAchievements] = useState<string[]>([]);
+  const [guessHistory, setGuessHistory] = useState<{value: number; level: number}[]>([]);
+  const [theme, setTheme] = useState("light");
 
+  useEffect(() => {
+    const stored = localStorage.getItem("ng_login");
+    if (stored) {
+      try {
+        const data = JSON.parse(stored);
+        setPlayerName(data.playerName || "");
+        setUserTitle(data.userTitle || "");
+        setIsLoggedIn(data.isLoggedIn || false);
+        setUnlockedTitles(data.unlockedTitles || []);
+      } catch { /* ignore */ }
+    }
+  }, []);
+
+  useEffect(() => {
+    const t = document.documentElement.dataset.theme || "light";
+    setTheme(t);
+  }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      localStorage.setItem("ng_login", JSON.stringify({
+        playerName, userTitle, isLoggedIn, unlockedTitles,
+      }));
+    } else {
+      localStorage.removeItem("ng_login");
+    }
+  }, [isLoggedIn, playerName, userTitle, unlockedTitles]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
   const gameRef = useRef(game);
   gameRef.current = game;
   const idleTimedOutRef = useRef(false);
@@ -113,10 +149,12 @@ export default function HomePage() {
   useEffect(() => {
     if (!game || !game.startedAt || !game.gameId) return;
     const interval = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((gameRef.current!.startedAt + 600000 - Date.now()) / 1000));
+      const timeLimit = gameRef.current!.mode === "challenge" ? 300000 : 600000;
+      const remaining = Math.max(0, Math.floor((gameRef.current!.startedAt + timeLimit - Date.now()) / 1000));
       setTimeLeft(remaining);
       if (remaining <= 0 && gameRef.current?.gameId) {
         const g = gameRef.current;
+        playTimeout();
         setResult({
           mode: g.mode,
           difficulty: g.difficulty,
@@ -153,6 +191,12 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [game]);
 
+  useEffect(() => {
+    if (game && game.gameId && !loading) {
+      inputRef.current?.focus();
+    }
+  }, [loading, game]);
+
   async function handleStartGame(guestName?: string) {
     const name = guestName || playerNameRef.current.trim();
     if (!name) return;
@@ -173,8 +217,9 @@ export default function HomePage() {
       }
       const data = await res.json();
       setGame(data);
-      setTimeLeft(600);
+      setTimeLeft(data.mode === "challenge" ? 300 : 600);
       setGuess("");
+      setGuessHistory([]);
     } catch {
       setGame(null);
     } finally {
@@ -200,8 +245,18 @@ export default function HomePage() {
         setLoading(false);
         return;
       }
+      setGuessHistory((prev) => [...prev, { value: Number(val), level: gameRef.current?.level ?? 1 }]);
 
-      if (data.result === "correct" || data.result === "gameover") {
+      if (data.result === "correct" || data.result === "victory" || data.result === "gameover") {
+        if (data.result === "correct" || data.result === "victory") playCorrect();
+        else playGameOver();
+        if (data.unlocks && Array.isArray(data.unlocks) && data.unlocks.length > 0) {
+          setNewUnlocks(data.unlocks);
+          setUnlockedTitles((prev) => [...new Set([...prev, ...data.unlocks])]);
+        }
+        if (data.achievements && Array.isArray(data.achievements) && data.achievements.length > 0) {
+          setNewAchievements(data.achievements);
+        }
         setResult({
           mode: data.mode,
           difficulty: data.difficulty || g.difficulty,
@@ -213,6 +268,7 @@ export default function HomePage() {
         });
         setGame(null);
       } else if (data.result === "levelup") {
+        playLevelUp();
         setGame({
           gameId: g.gameId,
           mode: "challenge",
@@ -227,6 +283,7 @@ export default function HomePage() {
           message: data.message,
         });
       } else {
+        playWrong();
         setGame((prev) => prev ? {
           ...prev,
           attempts: data.attempts ?? prev.attempts,
@@ -263,9 +320,10 @@ export default function HomePage() {
         setLoading(false);
         return;
       }
-      setGame((prev) => prev ? { ...prev, hintsLeft: data.hintsLeft, message: data.message } : prev);
+      playHint();
+      setGame((prev) => prev ? { ...prev, hintsLeft: data.hintsLeft, hintMessage: data.message } : prev);
     } catch {
-      setGame((prev) => prev ? { ...prev, message: "提示系統錯誤" } : prev);
+      setGame((prev) => prev ? { ...prev, hintMessage: "提示系統錯誤" } : prev);
     } finally {
       setLoading(false);
     }
@@ -279,10 +337,12 @@ export default function HomePage() {
     setIdleTime(0);
     setIdleWarning(false);
     setCustomMax("");
+    setNewUnlocks([]);
+    setNewAchievements([]);
+    setGuessHistory([]);
   }
 
   function forceReset() {
-    setPlayerName("");
     setMode("normal");
     setDifficulty("easy");
     setGame(null);
@@ -292,6 +352,9 @@ export default function HomePage() {
     setIdleTime(0);
     setIdleWarning(false);
     setCustomMax("");
+    setNewUnlocks([]);
+    setNewAchievements([]);
+    setGuessHistory([]);
   }
 
   async function handleAuth() {
@@ -308,6 +371,15 @@ export default function HomePage() {
       if (!res.ok) {
         setAuthMsg(data.error || "操作失敗");
       } else {
+        const name = authUser.trim();
+        const unlocks: string[] = [];
+        if (name === "King") {
+          unlocks.push("挑戰者", "神之一筆");
+        } else {
+          if (data.challengerUnlocked) unlocks.push("挑戰者");
+          if (data.godlyUnlocked) unlocks.push("神之一筆");
+        }
+        setUnlockedTitles(unlocks);
         setPlayerName(authUser.trim());
         setUserTitle(data.title || "初心者");
         setIsLoggedIn(true);
@@ -329,17 +401,57 @@ export default function HomePage() {
   return (
     <main style={{ maxWidth: 600, margin: "0 auto", padding: "2rem 1rem" }}>
       <h1 style={{ textAlign: "center", fontSize: "2rem" }}>🔢 Number Guessing Game</h1>
-      <p style={{ textAlign: "center", color: "#555" }}>
+      <p style={{ textAlign: "center", color: "var(--text-secondary)" }}>
         {mode === "normal" ? "不限次數，越少 attempts 排名越高！" : "有限次數，逐關挑戰，看你能闖到第幾關！"}
       </p>
 
       <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginBottom: "1.5rem" }}>
-        <button onClick={() => router.push("/leaderboard")} style={btnStyle}>🏆 Leaderboard</button>
+        <button onClick={() => router.push("/leaderboard")} style={btnStyle}>🏆 排行榜</button>
+        {isLoggedIn && (
+          <button onClick={() => router.push("/stats")} style={btnStyle}>📊 統計</button>
+        )}
+        <button onClick={() => {
+          const next = theme === "dark" ? "light" : "dark";
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem("ng_theme", next);
+          setTheme(next);
+        }} style={btnStyle}>
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
       </div>
 
       {result ? (
-        <div style={cardStyle}>
+        <div style={cardStyle} className="anim-pop-in">
           <h2 style={{ textAlign: "center", margin: 0 }}>📊 結算</h2>
+          {newUnlocks.length > 0 && (
+            <div className="anim-slide-down" style={{
+              background: "#f6ffed", border: "1px solid #b7eb8f", borderRadius: 8,
+              padding: "0.75rem 1rem", textAlign: "center",
+            }}>
+              <span style={{ fontSize: "1.2rem" }}>🎉</span>
+              {" "}解鎖稱號：<strong>{newUnlocks.join("、")}</strong>
+              {" "}<button onClick={() => { resetGame(); setNewUnlocks([]); setShowTitles(true); }}
+                style={{ background: "none", border: "none", color: "#52c41a", cursor: "pointer", fontWeight: 600 }}>
+                前往裝備
+              </button>
+            </div>
+          )}
+          {newAchievements.length > 0 && (
+            <div className="anim-slide-down" style={{
+              background: "#e6f7ff", border: "1px solid #91d5ff", borderRadius: 8,
+              padding: "0.75rem 1rem", textAlign: "center",
+            }}>
+              🏆 獲得成就：
+              <strong>{newAchievements.map((id) => {
+                const names: Record<string, string> = {
+                  first_win: "初次勝利", speed_demon: "閃電快手",
+                  marathon: "馬拉松選手", hint_master: "提示大師",
+                  persistent: "堅持不懈",
+                };
+                return names[id] || id;
+              }).join("、")}</strong>
+            </div>
+          )}
           <p style={{
             textAlign: "center", fontSize: "1.1rem", fontWeight: 500,
             color: result.mode === "challenge" ? "#722ed1" : "#1677ff",
@@ -348,7 +460,7 @@ export default function HomePage() {
               ? CHALLENGE_DIFFS.find((d) => d.key === result.difficulty)?.label
               : NORMAL_DIFFS.find((d) => d.key === result.difficulty)?.label) || result.difficulty
           }</p>
-          <p style={{ fontSize: "1rem", color: "#555", textAlign: "center" }}>{result.message}</p>
+          <p style={{ fontSize: "1rem", color: "var(--text-secondary)", textAlign: "center" }}>{result.message}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.5rem 0" }}>
             {result.mode === "normal" && result.attempts !== undefined && (
               <div style={statRowStyle}>
@@ -393,7 +505,7 @@ export default function HomePage() {
           {!isLoggedIn ? (
             <>
               <h2 style={{ margin: 0 }}>訪客模式</h2>
-              <p style={{ color: "#888", fontSize: "0.9rem" }}>
+              <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
                 名稱：unknown（不計分數）
               </p>
               <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -415,8 +527,8 @@ export default function HomePage() {
                   <h2 style={{ margin: 0 }}>👋 {playerName}</h2>
                   {userTitle && (
                     <span style={{
-                      fontSize: "0.8rem", color: "#888", fontWeight: 500,
-                      background: "#f0f0f0", padding: "0.1rem 0.5rem", borderRadius: 8,
+                      fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500,
+                      background: "var(--hover-bg)", padding: "0.1rem 0.5rem", borderRadius: 8,
                     }}>
                       {userTitle}
                     </span>
@@ -427,8 +539,13 @@ export default function HomePage() {
                     style={{ ...btnStyle, fontSize: "0.85rem", padding: "0.3rem 0.8rem", background: "#722ed1" }}>
                     稱號
                   </button>
-                  <button onClick={() => { setIsLoggedIn(false); setPlayerName(""); setUserTitle(""); }}
-                    style={{ ...btnStyle, fontSize: "0.85rem", padding: "0.3rem 0.8rem", background: "#f5222d" }}>
+                  <button onClick={() => {
+                    localStorage.removeItem("ng_login");
+                    setIsLoggedIn(false);
+                    setPlayerName("");
+                    setUserTitle("");
+                    setUnlockedTitles([]);
+                  }} style={{ ...btnStyle, fontSize: "0.85rem", padding: "0.3rem 0.8rem", background: "#f5222d" }}>
                     登出
                   </button>
                 </div>
@@ -443,7 +560,7 @@ export default function HomePage() {
                       onClick={() => { setMode(m.key); setDifficulty("easy"); setCustomMax(""); }}
                       style={{
                         ...btnStyle, flex: 1,
-                        background: mode === m.key ? "#1677ff" : "#e0e0e0",
+                        background: mode === m.key ? "#1677ff" : "var(--hover-bg)",
                         color: mode === m.key ? "white" : "#333",
                       }}
                     >
@@ -508,8 +625,8 @@ export default function HomePage() {
               <h2 style={{ margin: 0 }}>{playerName}</h2>
               {userTitle && (
                 <span style={{
-                  fontSize: "0.75rem", color: "#888", fontWeight: 500,
-                  background: "#f0f0f0", padding: "0.1rem 0.4rem", borderRadius: 6, marginLeft: "0.3rem",
+                  fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 500,
+                  background: "var(--hover-bg)", padding: "0.1rem 0.4rem", borderRadius: 6, marginLeft: "0.3rem",
                 }}>
                   {userTitle}
                 </span>
@@ -545,15 +662,42 @@ export default function HomePage() {
           </div>
 
           {game.temperatureLabel && (
-            <div style={{ fontSize: "2rem", fontWeight: 800, textAlign: "center",
+            <div className="anim-fade-in-up" style={{ fontSize: "2rem", fontWeight: 800, textAlign: "center",
               color: game.temperatureColor, letterSpacing: "0.05em" }}>
               {game.temperatureLabel}
+              <span style={{
+                fontSize: "0.85rem", fontWeight: 400, opacity: 0.7,
+                marginLeft: "0.5rem", display: "inline-block",
+              }}>
+                ({(() => {
+                  const d = game.distance;
+                  if (d === undefined) return "";
+                  if (d <= 5) return "±5";
+                  if (d <= 20) return "±20";
+                  if (d <= 50) return "±50";
+                  return ">50";
+                })()})
+              </span>
             </div>
           )}
 
-          <p style={{ fontSize: game.temperatureLabel ? "0.9rem" : "1.2rem", color: "#555", fontWeight: 500 }}>
+          <p style={{
+            fontSize: game.temperatureLabel ? "1rem" : "1.2rem",
+            color: "var(--text)", fontWeight: 600,
+            textAlign: "center",
+            background: "var(--hover-bg)", padding: "0.5rem 1rem", borderRadius: 8,
+          }}>
             {game.message}
           </p>
+
+          {game.hintMessage && (
+            <div style={{
+              fontSize: "0.85rem", color: "#722ed1", fontWeight: 600,
+              textAlign: "center", padding: "0.3rem 0",
+            }}>
+              {game.hintMessage}
+            </div>
+          )}
 
           {game.gameId && (
             <>
@@ -564,6 +708,7 @@ export default function HomePage() {
               )}
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <input
+                  ref={inputRef}
                   value={guess}
                   onChange={(e) => setGuess(e.target.value)}
                   placeholder={`輸入數字 (0-${game.max})`}
@@ -571,6 +716,7 @@ export default function HomePage() {
                   style={{ ...inputStyle, flex: 1 }}
                   onKeyDown={(e) => e.key === "Enter" && handleSubmitGuess()}
                   disabled={loading}
+                  autoFocus
                 />
                 <button onClick={handleSubmitGuess} disabled={loading || !guess.trim()} style={btnStyle}>
                   {loading ? "..." : "猜"}
@@ -579,7 +725,7 @@ export default function HomePage() {
               {game.mode === "challenge" && (
                 <div>
                   <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", marginBottom: "0.4rem" }}>
-                    <span style={{ fontSize: "0.85rem", color: "#888", fontWeight: 500 }}>
+                    <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: 500 }}>
                       💡 提示 ({game.hintsLeft ?? 0}/3)
                     </span>
                   </div>
@@ -591,7 +737,7 @@ export default function HomePage() {
                         disabled={loading || (game.hintsLeft ?? 0) <= 0}
                         style={{
                           flex: 1, fontSize: "0.78rem", padding: "0.35rem 0.3rem",
-                          background: "#f0f0f0", color: "#333", border: "1px solid #ddd",
+                          background: "var(--hover-bg)", color: "#333", border: "1px solid var(--border-light)",
                           borderRadius: 6, cursor: "pointer", fontWeight: 500,
                           opacity: (game.hintsLeft ?? 0) <= 0 ? 0.5 : 1,
                         }}
@@ -602,6 +748,49 @@ export default function HomePage() {
                   </div>
                 </div>
               )}
+              {guessHistory.length > 0 && (() => {
+                const levels = [...new Set(guessHistory.map((g) => g.level))].sort((a, b) => a - b);
+                const multiLevel = levels.length > 1;
+                return (
+                  <div style={{ maxHeight: 120, overflowY: "auto" }}>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 500, marginBottom: "0.3rem" }}>
+                      猜過：{guessHistory.length} 次
+                    </div>
+                    {levels.map((lv) => {
+                      const items = guessHistory.filter((g) => g.level === lv);
+                      return (
+                        <div key={lv} style={{ marginBottom: multiLevel ? "0.4rem" : 0 }}>
+                          {multiLevel && (
+                            <div style={{
+                              fontSize: "0.7rem", color: "#722ed1", fontWeight: 700,
+                              marginBottom: "0.2rem",
+                            }}>
+                              Level {lv}
+                            </div>
+                          )}
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.3rem" }}>
+                            {items.map((g, i) => {
+                              const isLast = multiLevel
+                                ? i === items.length - 1 && lv === levels[levels.length - 1]
+                                : g === guessHistory[guessHistory.length - 1];
+                              return (
+                                <span key={`${lv}-${i}`} style={{
+                                  background: "var(--hover-bg)", fontSize: "0.75rem", fontWeight: 600,
+                                  padding: "0.15rem 0.5rem", borderRadius: 6,
+                                  color: isLast ? "#1677ff" : "#555",
+                                  border: isLast ? "1px solid #1677ff" : "1px solid var(--border-light)",
+                                }}>
+                                  {g.value}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </>
           )}
 
@@ -622,7 +811,19 @@ export default function HomePage() {
             <h3 style={{ margin: 0 }}>稱號列表</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {["管理員", "初心者", "挑戰者", "神之一筆"].map((t) => {
-                const locked = t === "管理員" && playerName !== "King";
+                const isKing = playerName === "King";
+                let locked = false;
+                let lockReason = "";
+                if (t === "管理員") {
+                  locked = !isKing;
+                  lockReason = "僅 King 可用";
+                } else if (t === "挑戰者") {
+                  locked = !isKing && !unlockedTitles.includes("挑戰者");
+                  lockReason = "需遊玩闖關模式解鎖";
+                } else if (t === "神之一筆") {
+                  locked = !isKing && !unlockedTitles.includes("神之一筆");
+                  lockReason = "需一次猜中解鎖";
+                }
                 return (
                   <button
                     key={t}
@@ -637,6 +838,9 @@ export default function HomePage() {
                       if (res.ok) {
                         setUserTitle(t);
                         setShowTitles(false);
+                      } else {
+                        const err = await res.json();
+                        alert(err.error || "無法裝備");
                       }
                     }}
                     style={{
@@ -646,7 +850,7 @@ export default function HomePage() {
                       fontWeight: userTitle === t ? 700 : 500, cursor: locked ? "not-allowed" : "pointer",
                     }}
                   >
-                    {t} {userTitle === t && "✓"} {locked && " 🔒"}
+                    {t} {userTitle === t && " ✓"} {locked && ` 🔒 ${lockReason}`}
                   </button>
                 );
               })}
@@ -699,12 +903,13 @@ export default function HomePage() {
 }
 
 const cardStyle: React.CSSProperties = {
-  background: "white", borderRadius: 12, padding: "1.5rem",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.1)", display: "flex", flexDirection: "column", gap: "1rem",
+  background: "var(--card-bg)", borderRadius: 12, padding: "1.5rem",
+  boxShadow: "var(--shadow)", display: "flex", flexDirection: "column", gap: "1rem",
 };
 
 const inputStyle: React.CSSProperties = {
-  padding: "0.6rem 1rem", fontSize: "1rem", border: "1px solid #ccc", borderRadius: 8, outline: "none",
+  padding: "0.6rem 1rem", fontSize: "1rem", border: "1px solid var(--border)",
+  borderRadius: 8, outline: "none", background: "var(--input-bg)", color: "var(--text)",
 };
 
 const btnStyle: React.CSSProperties = {
@@ -714,6 +919,6 @@ const btnStyle: React.CSSProperties = {
 
 const statRowStyle: React.CSSProperties = {
   display: "flex", justifyContent: "space-between",
-  padding: "0.4rem 0.8rem", background: "#f9f9f9", borderRadius: 6,
+  padding: "0.4rem 0.8rem", background: "var(--muted-bg)", borderRadius: 6,
   fontSize: "0.95rem",
 };

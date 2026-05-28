@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+function useThemeSync() {
+  const [theme, setTheme] = useState("light");
+  useEffect(() => {
+    const t = document.documentElement.dataset.theme || "light";
+    setTheme(t);
+  }, []);
+  return { theme, setTheme };
+}
+
 type Score = {
   id: number;
   playerName: string;
@@ -26,6 +35,12 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState("normal");
   const [filter, setFilter] = useState("all");
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    const t = document.documentElement.dataset.theme || "light";
+    setTheme(t);
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -49,6 +64,15 @@ export default function LeaderboardPage() {
 
       <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginBottom: "1.5rem" }}>
         <button onClick={() => router.push("/")} style={btnStyle}>← 回到遊戲</button>
+        <button onClick={() => router.push("/stats")} style={btnStyle}>📊 統計</button>
+        <button onClick={() => {
+          const next = theme === "dark" ? "light" : "dark";
+          document.documentElement.dataset.theme = next;
+          localStorage.setItem("ng_theme", next);
+          setTheme(next);
+        }} style={btnStyle}>
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
       </div>
 
       <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", marginBottom: "1rem" }}>
@@ -58,8 +82,8 @@ export default function LeaderboardPage() {
             onClick={() => { setMode(m.key); setFilter("all"); }}
             style={{
               ...btnStyle, flex: 1,
-              background: mode === m.key ? "#1677ff" : "#e0e0e0",
-              color: mode === m.key ? "white" : "#333",
+              background: mode === m.key ? "#1677ff" : "var(--hover-bg)",
+              color: mode === m.key ? "white" : "var(--text)",
             }}
           >
             {m.label}
@@ -74,8 +98,8 @@ export default function LeaderboardPage() {
             onClick={() => setFilter(d)}
             style={{
               ...btnStyle,
-              background: filter === d ? "#1677ff" : "#e0e0e0",
-              color: filter === d ? "white" : "#333",
+              background: filter === d ? "#1677ff" : "var(--hover-bg)",
+              color: filter === d ? "white" : "var(--text)",
               padding: "0.3rem 0.8rem", fontSize: "0.85rem",
             }}
           >
@@ -84,7 +108,7 @@ export default function LeaderboardPage() {
         ))}
       </div>
 
-      <p style={{ textAlign: "center", color: "#555", marginBottom: "1rem" }}>
+      <p style={{ textAlign: "center", color: "var(--text-secondary)", marginBottom: "1rem" }}>
         {mode === "normal"
           ? "依照嘗試次數排名（越少越高）"
           : "依照過關數排名（越多越高）"}
@@ -98,7 +122,7 @@ export default function LeaderboardPage() {
         <div style={cardStyle}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ borderBottom: "2px solid #eee" }}>
+              <tr style={{ borderBottom: "2px solid var(--border-light)" }}>
                 <th style={thStyle}>#</th>
                 <th style={thStyle}>玩家</th>
                 {mode === "normal" ? (
@@ -112,7 +136,7 @@ export default function LeaderboardPage() {
             </thead>
             <tbody>
               {scores.map((s, i) => (
-                <tr key={s.id} style={{ borderBottom: "1px solid #eee" }}>
+                <tr key={s.id} style={{ borderBottom: "1px solid var(--border-light)" }}>
                   <td style={tdStyle}>{i + 1}</td>
                   <td style={tdStyle}>{s.playerName}</td>
                   {mode === "normal" ? (
@@ -140,16 +164,16 @@ export default function LeaderboardPage() {
 }
 
 const cardStyle: React.CSSProperties = {
-  background: "white", borderRadius: 12, padding: "1rem",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+  background: "var(--card-bg)", borderRadius: 12, padding: "1rem",
+  boxShadow: "var(--shadow)",
 };
 
 const thStyle: React.CSSProperties = {
-  textAlign: "left", padding: "0.6rem 0.8rem", fontWeight: 600,
+  textAlign: "left", padding: "0.6rem 0.8rem", fontWeight: 600, color: "var(--text)",
 };
 
 const tdStyle: React.CSSProperties = {
-  padding: "0.6rem 0.8rem",
+  padding: "0.6rem 0.8rem", color: "var(--text)",
 };
 
 const btnStyle: React.CSSProperties = {

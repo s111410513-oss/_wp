@@ -8,19 +8,25 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  title     String   @default("初心者")
-  createdAt DateTime @default(now())
+  id                 Int      @id @default(autoincrement())
+  username           String   @unique
+  password           String
+  title              String   @default("初心者")
+  challengerUnlocked Boolean  @default(false)
+  godlyUnlocked      Boolean  @default(false)
+  achievements       String   @default("[]")
+  createdAt          DateTime @default(now())
 }
 
 model Score {
   id            Int      @id @default(autoincrement())
   playerName    String
-  mode          String   @default("normal")
-  attempts      Int      @default(0)
-  levelsCleared Int      @default(0)
-  difficulty    String   @default("easy")
+  mode          String
+  attempts      Int
+  levelsCleared Int     @default(0)
+  difficulty    String
+  timeTaken     Int     @default(0)
+  hintsUsed     Int     @default(0)
+  won           Boolean @default(false)
   createdAt     DateTime @default(now())
 }

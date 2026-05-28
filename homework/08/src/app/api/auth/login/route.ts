@@ -23,5 +23,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Wrong password" }, { status: 401 });
   }
 
-  return NextResponse.json({ username: name, title: user.title, message: "Login successful" });
+  return NextResponse.json({
+    username: name,
+    title: user.title,
+    challengerUnlocked: user.challengerUnlocked,
+    godlyUnlocked: user.godlyUnlocked,
+    message: "Login successful",
+  });
 }

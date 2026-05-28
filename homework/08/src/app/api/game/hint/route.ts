@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { games, type ChallengeGame } from "@/lib/game-store";
 
-function isPrime(n: number): boolean {
-  if (n < 2) return false;
-  if (n === 2) return true;
-  if (n % 2 === 0) return false;
-  for (let i = 3; i * i <= n; i += 2) {
-    if (n % i === 0) return false;
-  }
-  return true;
-}
-
 export async function POST(req: NextRequest) {
   const { gameId, hintType } = await req.json();
 
@@ -29,7 +19,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "No hints remaining" }, { status: 400 });
   }
 
-  if (!["oddEven", "prime", "range"].includes(hintType)) {
+  if (!["oddEven", "halfRange", "lastDigit"].includes(hintType)) {
     return NextResponse.json({ error: "Invalid hint type" }, { status: 400 });
   }
 
@@ -38,13 +28,11 @@ export async function POST(req: NextRequest) {
   let hint = "";
   if (hintType === "oddEven") {
     hint = cg.number % 2 === 0 ? "偶數 (Even)" : "奇數 (Odd)";
-  } else if (hintType === "prime") {
-    hint = isPrime(cg.number) ? "是質數 (Prime)" : "不是質數 (Not Prime)";
-  } else if (hintType === "range") {
-    const third = Math.ceil(cg.max / 3);
-    if (cg.number <= third) hint = `0 ~ ${third}`;
-    else if (cg.number <= third * 2) hint = `${third + 1} ~ ${third * 2}`;
-    else hint = `${third * 2 + 1} ~ ${cg.max}`;
+  } else if (hintType === "halfRange") {
+    const mid = Math.floor(cg.max / 2);
+    hint = cg.number <= mid ? `0 ~ ${mid}（下半部）` : `${mid + 1} ~ ${cg.max}（上半部）`;
+  } else if (hintType === "lastDigit") {
+    hint = `個位數字是 ${cg.number % 10}`;
   }
 
   return NextResponse.json({
