@@ -2,6 +2,8 @@
 
 > 本文件由 AI 工具輔助產出：**opencode（AI CLI 協作工具）、ChatGPT、Gemini**
 >
+> opencode 對話紀錄（08 猜數字遊戲）：`08/CONVERSATION.md`
+>
 > ChatGPT 對話紀錄：
 > - <https://chatgpt.com/share/6a190c1e-d834-83a5-851c-5469987e4b54>
 > - <https://chatgpt.com/share/6a190c32-3ee8-8320-8e6a-423545abea58>
