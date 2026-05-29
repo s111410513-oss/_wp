@@ -1,6 +1,17 @@
 # 《_wp》課程作業總整理
 
 > 本文件由 AI 工具輔助產出：**opencode（AI CLI 協作工具）、ChatGPT、Gemini**
+>
+> ChatGPT 對話紀錄：
+> - <https://chatgpt.com/share/6a190c1e-d834-83a5-851c-5469987e4b54>
+> - <https://chatgpt.com/share/6a190c32-3ee8-8320-8e6a-423545abea58>
+> - <https://chatgpt.com/share/6a190c4c-5f00-8324-9d70-9617efcdab21>
+> - <https://chatgpt.com/share/6a190c59-cabc-83a5-88a4-21407039fc58>
+> - <https://chatgpt.com/share/6a190c6a-036c-8320-9ab3-116dcecade0d>
+> - <https://chatgpt.com/share/6a190c7a-60a8-8321-b52a-5fcce09800fd>
+> - <https://chatgpt.com/share/6a190c86-613c-83a7-866d-f17dfa294055>
+> - <https://chatgpt.com/share/6a190c91-9430-8322-87bf-00f6b03b3c3e>
+> - <https://chatgpt.com/share/6a190cb2-1fb8-8323-92f6-4402985a27ba>
 
 ---
 
