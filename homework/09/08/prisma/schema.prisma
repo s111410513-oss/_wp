@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  username           String   @unique
+  password           String
+  title              String   @default("初心者")
+  challengerUnlocked Boolean  @default(false)
+  godlyUnlocked      Boolean  @default(false)
+  achievements       String   @default("[]")
+  createdAt          DateTime @default(now())
+}
+
+model Score {
+  id            Int      @id @default(autoincrement())
+  playerName    String
+  mode          String
+  attempts      Int
+  levelsCleared Int     @default(0)
+  difficulty    String
+  timeTaken     Int     @default(0)
+  hintsUsed     Int     @default(0)
+  won           Boolean @default(false)
+  createdAt     DateTime @default(now())
+}

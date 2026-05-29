@@ -1,0 +1,14 @@
+function calculateTotal(cart, discountFunc) {
+  let sum = 0;
+
+  for (let i = 0; i < cart.length; i++) {
+    sum += cart[i];
+  }
+
+  return discountFunc(sum);
+}
+const result = calculateTotal([100, 200, 300], function(total) {
+  return total - 50;
+});
+
+console.log(result); // 550

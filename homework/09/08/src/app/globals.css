@@ -1,0 +1,90 @@
+:root, [data-theme="light"] {
+  --bg: #f0f2f5;
+  --card-bg: #fff;
+  --text: #333;
+  --text-secondary: #555;
+  --text-muted: #888;
+  --border: #ccc;
+  --border-light: #ddd;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --hover-bg: #f0f0f0;
+  --muted-bg: #f9f9f9;
+  --input-bg: #fff;
+}
+
+[data-theme="dark"] {
+  --bg: #141414;
+  --card-bg: #1f1f1f;
+  --text: #e0e0e0;
+  --text-secondary: #aaa;
+  --text-muted: #777;
+  --border: #444;
+  --border-light: #333;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --hover-bg: #2a2a2a;
+  --muted-bg: #262626;
+  --input-bg: #2a2a2a;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}
+
+input, button {
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+[data-theme="dark"] input {
+  color-scheme: dark;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-6px); }
+  75%      { transform: translateX(6px); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to   { opacity: 1; max-height: 200px; }
+}
+
+.anim-fade-in-up {
+  animation: fadeInUp 0.35s ease-out forwards;
+}
+
+.anim-pop-in {
+  animation: popIn 0.3s ease-out forwards;
+}
+
+.anim-pulse {
+  animation: pulse 0.4s ease-in-out;
+}
+
+.anim-shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+.anim-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+  overflow: hidden;
+}

@@ -1,0 +1,5 @@
+let params = {};   // 建立空物件
+
+params["id"] = 99; // 動態新增 key: id, value: 99
+
+console.log(params);
