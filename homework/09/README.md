@@ -8,6 +8,7 @@
 
 ```
 homework/
+├── 01/          自我介紹（HTML + CSS — 吳京）
 ├── 02/          HTML 表單範例（各種 HTML 輸入類型）
 ├── 03/          JavaScript 入門 — Hello World
 ├── 04/          JavaScript 基礎語法練習（if/for/while/function/array/object/JSON）
@@ -17,6 +18,14 @@ homework/
 ├── 08/          猜數字遊戲（Next.js + Prisma + SQLite，含排行榜、成就系統、深色模式）
 └── 09/          本總整理資料夾
 ```
+
+---
+
+## 01 — 自我介紹
+
+**檔案：** `01/自我介紹.吳京.html`
+
+作者吳京（金門大學 資工一）的個人介紹頁面，包含基本資料、關於我、興趣三大區塊。使用綠色系 header + 卡片式排版。
 
 ---
 
@@ -180,7 +189,9 @@ Node.js + Express + JSON 檔案儲存 + 原生 HTML/CSS/JS
 ## 學習路徑建議
 
 ```
-入門  →  HTML 表單（02）
+入門  →  自我介紹（01）
+        ↓
+      HTML 表單（02）
         ↓
 基礎  →  JS 語法練習（03 → 04）
         ↓
