@@ -40,24 +40,169 @@ homework/
 
 作者吳京（金門大學 資工一）的個人介紹頁面，包含基本資料、關於我、興趣三大區塊。使用綠色系 header + 卡片式排版。
 
+```html
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>吳京自我介紹</title>
+    <style>
+        body{
+            font-family: Arial, "Microsoft JhengHei", sans-serif;
+            background-color:#f4f4f4;
+            margin:0;
+            padding:0;
+        }
+        header{
+            background:#4CAF50;
+            color:white;
+            text-align:center;
+            padding:30px;
+        }
+        .container{
+            width:80%;
+            margin:auto;
+            overflow:hidden;
+        }
+        .card{
+            background:white;
+            padding:20px;
+            margin-top:20px;
+            border-radius:10px;
+            box-shadow:0 0 10px rgba(0,0,0,0.1);
+        }
+        h2{ color:#333; }
+        ul{ line-height:1.8; }
+        footer{
+            text-align:center;
+            padding:15px;
+            margin-top:20px;
+            background:#333;
+            color:white;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>我的自我介紹</h1>
+    <p>Welcome to My Personal Page</p>
+</header>
+<div class="container">
+    <div class="card">
+        <h2>基本資料</h2>
+        <p>姓名：吳京</p>
+        <p>學校：金門大學</p>
+        <p>科系 / 班級：資工一</p>
+    </div>
+    <div class="card">
+        <h2>關於我</h2>
+        <p>喜歡電腦、看電影，透過運動維持健康。</p>
+    </div>
+    <div class="card">
+        <h2>興趣</h2>
+        <ul>
+            <li>運動</li>
+            <li>聽音樂</li>
+            <li>打遊戲</li>
+            <li>看電影</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
+```
+
 ---
 
 ## 02 — HTML 表單範例
 
 **檔案：** `02/html`
 
-一個完整的 HTML 表單教學頁面，展示各種 HTML 輸入類型：
+一個完整的 HTML 表單教學頁面，展示各種 HTML 輸入類型（基本資料、日期時間、選項、下拉選單、建議輸入、顏色/範圍/檔案、隱藏欄位、進度條），每個欄位都有中文註解。
 
-- **基本資料：** text、password、email、tel、number、url、search
-- **日期時間：** date、time、datetime-local、month、week
-- **選項：** radio（單選）、checkbox（多選）
-- **下拉選單：** select + option
-- **建議輸入：** input + datalist
-- **其他輸入：** color、range、file、textarea
-- **隱藏欄位：** hidden
-- **狀態顯示：** progress、meter
-
-每個欄位都有中文註解說明用途。
+```html
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>表單範例</title>
+<style>
+body{ font-family:Arial; background:#f0f0f0; padding:30px; }
+.container{ background:white; padding:20px; width:500px; margin:auto; border-radius:10px; }
+label{ display:block; margin-top:10px; font-weight:bold; }
+input,select,textarea{ width:100%; padding:6px; margin-top:4px; }
+.option{ width:auto; }
+button{ margin-top:15px; padding:10px; }
+</style>
+</head>
+<body>
+<div class="container">
+<h2>HTML 表單</h2>
+<form>
+<fieldset><legend>基本資料</legend>
+  <label>姓名</label><input type="text" name="name">
+  <label>密碼</label><input type="password" name="password">
+  <label>Email</label><input type="email" name="email">
+  <label>電話</label><input type="tel" name="phone">
+  <label>年齡</label><input type="number" name="age" min="0" max="120">
+  <label>網站</label><input type="url" name="website">
+  <label>搜尋</label><input type="search" name="search">
+</fieldset>
+<fieldset><legend>日期時間</legend>
+  <label>生日</label><input type="date" name="birthday">
+  <label>時間</label><input type="time" name="time">
+  <label>日期時間</label><input type="datetime-local" name="datetime">
+  <label>月份</label><input type="month" name="month">
+  <label>週</label><input type="week" name="week">
+</fieldset>
+<fieldset><legend>選項</legend>
+  <label>性別</label>
+  <input class="option" type="radio" name="gender"> 男
+  <input class="option" type="radio" name="gender"> 女
+  <input class="option" type="radio" name="gender"> 其他
+  <label>興趣</label>
+  <input class="option" type="checkbox"> 音樂
+  <input class="option" type="checkbox"> 運動
+  <input class="option" type="checkbox"> 遊戲
+  <input class="option" type="checkbox"> 閱讀
+</fieldset>
+<fieldset><legend>下拉選單</legend>
+  <label>城市</label>
+  <select name="city">
+    <option value="">請選擇</option>
+    <option>台北</option><option>台中</option>
+    <option>台南</option><option>高雄</option>
+  </select>
+</fieldset>
+<fieldset><legend>建議輸入</legend>
+  <input list="browsers" name="browser">
+  <datalist id="browsers">
+    <option value="Chrome"><option value="Edge">
+    <option value="Firefox"><option value="Safari">
+  </datalist>
+</fieldset>
+<fieldset><legend>其他輸入</legend>
+  <label>顏色</label><input type="color" name="color">
+  <label>範圍</label><input type="range" name="range" min="0" max="100">
+  <label>檔案上傳</label><input type="file" name="file">
+  <label>留言</label><textarea name="message" rows="4"></textarea>
+</fieldset>
+<fieldset><legend>隱藏資料</legend>
+  <input type="hidden" name="userid" value="12345">
+</fieldset>
+<fieldset><legend>狀態顯示</legend>
+  <label>下載進度</label><progress value="70" max="100"></progress>
+  <label>使用率</label><meter value="0.6"></meter>
+</fieldset>
+<br>
+<button type="submit">送出</button>
+<button type="reset">重設</button>
+<button type="button">普通按鈕</button>
+</form>
+</div>
+</body>
+</html>
+```
 
 ---
 
@@ -77,18 +222,109 @@ console.log('hello 你好')
 
 **共 10 個練習檔，涵蓋核心 JS 語法：**
 
-| 檔案 | 主題 | 說明 |
-|------|------|------|
-| `01-if.js` | if 條件判斷 | 判斷奇數 / 偶數 |
-| `02-for.js` | for 迴圈 | 計算 1~10 總和 |
-| `03-while.js` | while 迴圈 | 從 1 數到 5 |
-| `04-function.js` | 函式 | Hello, John 問候函式 |
-| `05-array.js` | 陣列操作 | push / for 遍歷 |
-| `06-object.js` | 物件 | 存取 person.name / age |
-| `07-json.js` | JSON 解析 | JSON.parse 轉物件 |
-| `08-gradepass.js` | 函式 + if | 判斷成績及格 / 不及格 |
-| `09-maximum.js` | 陣列找最大值 | for + if 找最大值 |
-| `10-score.js` | while + object | 學生成績遍歷判斷 |
+### 01-if.js — if 條件判斷（奇數 / 偶數）
+```js
+let num = 7;
+if (num % 2 === 0) {
+    console.log("偶數");
+} else {
+    console.log("奇數");
+}
+```
+
+### 02-for.js — for 迴圈（1~10 總和）
+```js
+let sum = 0;
+for (let i = 1; i <= 10; i++) {
+    sum += i;
+}
+console.log(sum);
+```
+
+### 03-while.js — while 迴圈（1 數到 5）
+```js
+let i = 1;
+while (i <= 5) {
+    console.log(i);
+    i++;
+}
+```
+
+### 04-function.js — 函式（Hello, John）
+```js
+function greet(name) {
+    return "Hello, " + name;
+}
+console.log(greet("John"));
+```
+
+### 05-array.js — 陣列操作（push / for 遍歷）
+```js
+let fruits = ["apple", "banana", "orange"];
+fruits.push("grape");
+for (let i = 0; i < fruits.length; i++) {
+    console.log(fruits[i]);
+}
+```
+
+### 06-object.js — 物件存取
+```js
+let person = {
+    name: "Tom",
+    age: 20
+};
+console.log(person.name);
+console.log(person.age);
+```
+
+### 07-json.js — JSON 解析
+```js
+let jsonString = '{"name":"Amy","age":25}';
+let obj = JSON.parse(jsonString);
+console.log(obj.name);
+```
+
+### 08-gradepass.js — 函式 + if（及格判斷）
+```js
+function checkScore(score) {
+    if (score >= 60) {
+        return "及格";
+    } else {
+        return "不及格";
+    }
+}
+console.log(checkScore(75));
+```
+
+### 09-maximum.js — 陣列找最大值
+```js
+let numbers = [3, 7, 2, 9, 5];
+let max = numbers[0];
+for (let i = 1; i < numbers.length; i++) {
+    if (numbers[i] > max) {
+        max = numbers[i];
+    }
+}
+console.log("最大值:", max);
+```
+
+### 10-score.js — while + object（學生成績）
+```js
+let students = [
+    { name: "A", score: 80 },
+    { name: "B", score: 55 },
+    { name: "C", score: 90 }
+];
+let i = 0;
+while (i < students.length) {
+    if (students[i].score >= 60) {
+        console.log(students[i].name + " 及格");
+    } else {
+        console.log(students[i].name + " 不及格");
+    }
+    i++;
+}
+```
 
 此目錄另有 README.md 記錄 ChatGPT 輔助學習的連結與測試輸出結果。
 
@@ -103,6 +339,72 @@ console.log('hello 你好')
 - **會員系統：** 註冊 / 登入（密碼雜湊）
 - **Threads 風格 UI：** 黑色主題、側邊欄導航、卡片式貼文、漸層頭像
 - **三大專區：** 所有貼文（公共）、我的貼文（個人）、探索使用者
+
+### 後端 server.js（主要 API 路由）
+```js
+const app = express();
+const PORT = 3001;
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.static('public'));
+
+// 文章 CRUD
+app.get('/api/posts', (req, res) => { /* 取得所有文章 */ });
+app.get('/api/posts/:id', (req, res) => { /* 取得單篇文章 */ });
+app.get('/api/posts/user/:username', (req, res) => { /* 取得特定使用者文章 */ });
+
+app.post('/api/posts', (req, res) => {
+    const newPost = {
+        id: Date.now(),
+        title: req.body.title,
+        content: req.body.content,
+        author: req.body.author,
+        createdAt: new Date().toISOString()
+    };
+    // 存入 posts.json
+});
+
+app.put('/api/posts/:id', (req, res) => { /* 編輯文章 */ });
+app.delete('/api/posts/:id', (req, res) => { /* 刪除文章 */ });
+
+// 會員系統
+app.post('/api/register', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: '請輸入帳號和密碼' });
+    // 檢查重複、雜湊密碼、存入 users.json
+});
+app.post('/api/login', (req, res) => {
+    // 驗證帳號密碼、回傳使用者資訊
+});
+app.get('/api/users', (req, res) => { /* 取得所有使用者 */ });
+```
+
+### 前端 index.html（Threads 風格結構）
+```html
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="logo">Threads</div>
+            <a onclick="showSection('all')">所有貼文</a>
+            <a onclick="showSection('personal')">我的貼文</a>
+            <a onclick="showSection('users')">使用者</a>
+        </div>
+        <div class="main">
+            <div id="authSection">登入區塊</div>
+            <div id="createPostSection">發表貼文</div>
+            <div id="allPostsSection">所有貼文</div>
+            <div id="personalPostsSection">我的貼文</div>
+            <div id="usersSection">使用者專區</div>
+        </div>
+    </div>
+</body>
+```
+
+### 資料流程
+```
+發表貼文：使用者輸入 → createPost() → POST /api/posts → 寫入 posts.json → 重新渲染
+登入流程：輸入帳密 → submitAuth() → POST /api/login → 密碼雜湊比對 → 存入 localStorage
+```
 
 ### 子目錄 / 檔案
 | 路徑 | 說明 |
@@ -124,18 +426,97 @@ Node.js + Express + JSON 檔案儲存 + 原生 HTML/CSS/JS
 
 **共 10 個練習，涵蓋 JS 進階函數概念：**
 
-| # | 主題 | 說明 |
-|---|------|------|
-| 1 | Callback 基礎實作 | 傳入不同 action 函數處理加/減法 |
-| 2 | IIFE（立即執行函數） | 匿名函數立即執行，封裝變數作用域 |
-| 3 | 箭頭函數與陣列轉換 | map + 箭頭函數計算八折價格 |
-| 4 | 破壞性修改 | pop / unshift 直接修改原陣列 |
-| 5 | Higher-Order Function | 函數回傳函數（multiplier 工廠） |
-| 6 | Callback 篩選器 | 自訂 myFilter 搭配 callback |
-| 7 | 箭頭函數處理物件 | filter + 箭頭函數篩選成年人 |
-| 8 | 參數傳址陷阱 | push vs 重新賦值的差異 |
-| 9 | 延遲執行的 Callback | setTimeout + 箭頭函數 |
-| 10 | 綜合應用：計算總價 | 購物車總價 + discount callback |
+### 1. Callback 基礎實作
+```js
+function mathTool(num1, num2, action) {
+  return action(num1, num2);
+}
+console.log(mathTool(10, 5, function(a, b) { return a + b; }));
+console.log(mathTool(10, 5, function(a, b) { return a - b; }));
+```
+
+### 2. IIFE（立即執行函數）
+```js
+(function () {
+    var count = 100;
+    console.log("Count is: " + count);
+})();
+```
+
+### 3. 箭頭函數與陣列轉換
+```js
+const prices = [100, 200, 300, 400];
+const discounted = prices.map(p => p * 0.8);
+console.log(discounted);
+```
+
+### 4. 破壞性修改（傳址）
+```js
+function cleanData(arr) {
+  arr.pop();
+  arr.unshift("Start");
+}
+let myData = [1, 2, 3];
+cleanData(myData);
+console.log(myData); // ["Start", 1, 2]
+```
+
+### 5. Higher-Order Function
+```js
+const double = multiplier(2);
+console.log(double(10)); // 20
+const triple = multiplier(3);
+console.log(triple(10)); // 30
+```
+
+### 6. Callback 篩選器
+```js
+function myFilter(arr, callback) {
+  let result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (callback(arr[i])) result.push(arr[i]);
+  }
+  return result;
+}
+const nums = [1, 5, 8, 12];
+const filtered = myFilter(nums, function(item) { return item > 7; });
+console.log(filtered);
+```
+
+### 7. 箭頭函數處理物件
+```js
+const users = [
+  { name: "Alice", age: 25 },
+  { name: "Bob", age: 17 }
+];
+const adults = users.filter(user => user.age >= 18);
+console.log(adults);
+```
+
+### 8. 參數傳址陷阱
+```
+一、a.push(99) 會改到原陣列（.push() 修改內容不是重新指派）
+二、b = [100] 不會影響 listB（重新指派指向新記憶體位置）
+```
+
+### 9. 延遲執行的 Callback
+```js
+setTimeout(() => {
+  const arr = ["Task", "Completed"];
+  console.log(arr.join(" "));
+}, 2000);
+```
+
+### 10. 綜合應用：計算總價
+```js
+function calculateTotal(cart, discountFunc) {
+  let sum = 0;
+  for (let i = 0; i < cart.length; i++) sum += cart[i];
+  return discountFunc(sum);
+}
+const result = calculateTotal([100, 200, 300], function(total) { return total - 50; });
+console.log(result); // 550
+```
 
 ---
 
@@ -143,18 +524,112 @@ Node.js + Express + JSON 檔案儲存 + 原生 HTML/CSS/JS
 
 **共 10+ 個練習，聚焦實用程式設計模式：**
 
-| # | 主題 | 說明 |
-|---|------|------|
-| 1 | 物件屬性存取 | 點記法 vs 括號記法存取物件 |
-| 2 | 物件解構賦值 | 從 req.body 解構 title / content / author |
-| 3 | forEach & 模板字串 | 遍歷貼文陣列產生 HTML |
-| 4 | 字典與動態參數 | 動態新增物件 key |
-| 6 | JSON 處理 | JSON.parse 解析 tags 陣列 |
-| 7 | 模擬資料庫查詢 | fakeGet 模擬 SQL 查詢 + Callback |
-| 8 | 模板字串邏輯運算 | 三元運算子決定顯示內容 |
-| 9 | 排序與切片 | map + slice 截斷長字串 |
-| 10 | Error-First Callback | 錯誤優先回呼模式（checkAdmin） |
-| 額外 | Error-First Callback 實作 | fetchData 模擬資料庫回傳 |
+### 1. 物件屬性存取
+```js
+let post = {
+  id: 1,
+  title: "Hello World",
+  content: "Markdown content"
+};
+console.log(post.title);
+console.log(post["title"]);
+```
+
+### 2. 物件解構賦值
+```js
+const req = { body: { title: "JS教學", content: "內容在此", author: "Gemini" } };
+const { title, content } = req.body;
+console.log(title);
+console.log(content);
+```
+
+### 3. forEach & 模板字串
+```js
+const posts = [
+  { id: 1, t: "A" },
+  { id: 2, t: "B" }
+];
+let html = "";
+posts.forEach(post => {
+  html += `<div>${post.t}</div>`;
+});
+console.log(html);
+```
+
+### 4. 字典與動態參數
+```js
+let params = {};
+params["id"] = 99;
+console.log(params);
+```
+
+### 6. JSON 處理
+```js
+const jsonStr = '{"title": "Post 1", "tags": ["js", "node"]}';
+let obj = JSON.parse(jsonStr);
+console.log(obj.tags[1]);
+```
+
+### 7. 模擬資料庫查詢
+```js
+function fakeGet(sql, params, callback) {
+  const fakeRow = {
+    id: 1,
+    title: "掌握 JavaScript 函數",
+    content: "這是一篇關於 Callback 的文章..."
+  };
+  callback(null, fakeRow);
+}
+fakeGet("SELECT * FROM posts WHERE id = ?", [1], (err, row) => {
+  console.log("抓到的文章標題是：", row.title);
+});
+```
+
+### 8. 模板字串邏輯運算
+```js
+const user = "Guest";
+const html = `<h1>Welcome, ${user ? user : "Stranger"}</h1>`;
+console.log(html);
+```
+
+### 9. 排序與切片
+```js
+const arr = [
+  "Very long content here",
+  "Another Very long content here",
+  "3rd Very long content here"
+];
+const result = arr.map(str => str.slice(0, 10) + "...");
+console.log(result);
+```
+
+### 10. Error-First Callback
+```js
+function checkAdmin(role, callback) {
+    if (role !== "admin") return callback("Access Denied");
+    callback(null, "Welcome");
+}
+checkAdmin("user", (err, result) => {
+    if (err) console.log("錯誤：", err);
+    else console.log("成功：", result);
+});
+checkAdmin("admin", (err, result) => {
+    if (err) console.log("錯誤：", err);
+    else console.log("成功：", result);
+});
+```
+
+### 額外 — Error-First Callback 實作
+```js
+function fetchData(id, callback) {
+    const fakeData = { id: id, status: "success" };
+    callback(null, fakeData);
+}
+fetchData(101, (err, data) => {
+    if (err) console.log("發生錯誤：" + err);
+    else console.log("成功取得資料：", data);
+});
+```
 
 ---
 
@@ -182,6 +657,63 @@ Node.js + Express + JSON 檔案儲存 + 原生 HTML/CSS/JS
 | 資料庫 | SQLite (via Prisma ORM) |
 | 音效 | Web Audio API |
 | 認證 | sha256 hash + localStorage session |
+
+### Prisma 資料庫模型
+```prisma
+model User {
+  id        String  @id @default(cuid())
+  username  String  @unique
+  password  String
+  title     String  @default("beginner")
+  challengerUnlocked Boolean @default(false)
+  godlyUnlocked      Boolean @default(false)
+  scores    Score[]
+  createdAt DateTime @default(now())
+}
+
+model Score {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  mode      String   // "normal" or "challenge"
+  difficulty String?
+  attempts  Int
+  maxLevel  Int?
+  won       Boolean  @default(true)
+  timeTaken Int      @default(0)
+  hintsUsed Int      @default(0)
+  createdAt DateTime @default(now())
+}
+```
+
+### 闖關模式公式（challenge.ts）
+```ts
+export function getRange(level: number): number {
+  return 1000 + 255 * (level - 1);
+}
+export function getMaxAttempts(level: number, difficulty: string): number {
+  const base = Math.ceil(Math.log2(getRange(level) + 1));
+  const bonus = { easy: 5, medium: 3, hard: 0 };
+  return base + (bonus[difficulty] ?? 3);
+}
+```
+
+### 遊戲核心邏輯（guess route）
+```ts
+// 檢查猜測、計算溫度、驗證時限、更新遊戲狀態
+// 終局時：檢查成就解鎖、寫入 Score DB、回傳 unlocks
+```
+
+### 成就系統（achievements.ts）
+```ts
+const achievements = [
+  { id: "first_win",    name: "初次勝利",   condition: (s) => s.totalWins >= 1 },
+  { id: "speed_demon",  name: "閃電快手",   condition: (s) => s.fastestTime <= 10 },
+  { id: "marathon",     name: "馬拉松選手", condition: (s) => s.maxChallengeLevel >= 5 },
+  { id: "hint_master",  name: "提示大師",   condition: (s) => s.noHintWins >= 1 },
+  { id: "persistent",   name: "堅持不懈",   condition: (s) => s.totalGames >= 10 },
+];
+```
 
 ### 關鍵檔案
 ```
