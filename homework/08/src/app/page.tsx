@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { playCorrect, playWrong, playLevelUp, playGameOver, playTimeout, playHint } from "@/lib/sound";
+import { startBgm, stopBgm, setBgmVolume, getBgmVolume, isBgmPlaying } from "@/lib/bgm";
 
 type GameData = {
   gameId: string;
@@ -98,6 +99,10 @@ export default function HomePage() {
   const [newAchievements, setNewAchievements] = useState<string[]>([]);
   const [guessHistory, setGuessHistory] = useState<{value: number; level: number}[]>([]);
   const [theme, setTheme] = useState("light");
+  const [showSettings, setShowSettings] = useState(false);
+  const [bgmEnabled, setBgmEnabled] = useState(true);
+  const [bgmVolume, setBgmVolumeState] = useState(0.3);
+  const bgmStartedRef = useRef(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("ng_login");
@@ -126,6 +131,62 @@ export default function HomePage() {
       localStorage.removeItem("ng_login");
     }
   }, [isLoggedIn, playerName, userTitle, unlockedTitles]);
+
+  useEffect(() => {
+    const s = localStorage.getItem("ng_settings");
+    if (s) {
+      try {
+        const d = JSON.parse(s);
+        setBgmEnabled(d.bgmEnabled ?? true);
+        const vol = d.bgmVolume ?? 0.3;
+        setBgmVolumeState(vol);
+        setBgmVolume(vol);
+        if (!d.bgmEnabled) stopBgm();
+        else if (bgmStartedRef.current) startBgm();
+      } catch { /* ignore */ }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("ng_settings", JSON.stringify({ bgmEnabled, bgmVolume }));
+  }, [bgmEnabled, bgmVolume]);
+
+  function toggleBgm() {
+    if (bgmEnabled) {
+      stopBgm();
+      setBgmEnabled(false);
+    } else {
+      setBgmEnabled(true);
+      if (!bgmStartedRef.current) {
+        bgmStartedRef.current = true;
+        setBgmVolume(bgmVolume);
+      }
+      startBgm();
+    }
+  }
+
+  function handleBgmVolume(vol: number) {
+    setBgmVolumeState(vol);
+    setBgmVolume(vol);
+  }
+
+  useEffect(() => {
+    function onFirstInteraction() {
+      if (!bgmStartedRef.current) {
+        bgmStartedRef.current = true;
+        if (bgmEnabled) {
+          setBgmVolume(bgmVolume);
+          startBgm();
+        }
+      }
+    }
+    document.addEventListener("click", onFirstInteraction, { once: true });
+    document.addEventListener("keydown", onFirstInteraction, { once: true });
+    return () => {
+      document.removeEventListener("click", onFirstInteraction);
+      document.removeEventListener("keydown", onFirstInteraction);
+    };
+  }, []);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const gameRef = useRef(game);
@@ -417,6 +478,9 @@ export default function HomePage() {
           setTheme(next);
         }} style={btnStyle}>
           {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+        <button onClick={() => setShowSettings(true)} style={{ ...btnStyle, background: "#888" }}>
+          ⚙️
         </button>
       </div>
 
@@ -923,6 +987,47 @@ export default function HomePage() {
                 取消
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showSettings && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100,
+        }}>
+          <div style={{ ...cardStyle, width: 340 }}>
+            <h3 style={{ margin: 0 }}>⚙️ 設定</h3>
+
+            <div>
+              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
+                背景音樂
+              </label>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <button onClick={toggleBgm} style={{
+                  ...btnStyle, flex: 1,
+                  background: bgmEnabled ? "#52c41a" : "#f5222d",
+                }}>
+                  {bgmEnabled ? "🟢 開啟" : "🔴 關閉"}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
+                音量：{Math.round(bgmVolume * 100)}%
+              </label>
+              <input
+                type="range" min={0} max={100} value={Math.round(bgmVolume * 100)}
+                onChange={(e) => handleBgmVolume(Number(e.target.value) / 100)}
+                style={{ width: "100%", accentColor: "#722ed1" }}
+              />
+            </div>
+
+            <button onClick={() => setShowSettings(false)}
+              style={{ ...btnStyle, background: "#888" }}>
+              關閉
+            </button>
           </div>
         </div>
       )}
