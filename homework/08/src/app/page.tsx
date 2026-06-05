@@ -503,7 +503,7 @@ export default function HomePage() {
           )}
 
           {!isLoggedIn ? (
-            <>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <h2 style={{ margin: 0 }}>訪客模式</h2>
               <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
                 名稱：unknown（不計分數）
@@ -519,9 +519,9 @@ export default function HomePage() {
                   🔑 登入
                 </button>
               </div>
-            </>
+            </div>
           ) : (
-            <>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <h2 style={{ margin: 0 }}>👋 {playerName}</h2>
@@ -553,87 +553,87 @@ export default function HomePage() {
                   </button>
                 </div>
               </div>
-
-              <div>
-                <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>遊戲模式</label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  {MODES.map((m) => (
-                    <button
-                      key={m.key}
-                      onClick={() => { setMode(m.key); setDifficulty("easy"); setCustomMax(""); }}
-                      style={{
-                        ...btnStyle, flex: 1,
-                        background: mode === m.key ? "#1677ff" : "var(--hover-bg)",
-                        color: mode === m.key ? "white" : "var(--text)",
-                      }}
-                    >
-                      {m.label}
-                      <br /><small>{m.desc}</small>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
-                  {mode === "normal" ? "難度（範圍）" : "難度（嘗試次數）"}
-                </label>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  {(mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS).map((d) => (
-                    <button
-                      key={d.key}
-                      onClick={() => setDifficulty(d.key)}
-                      style={{
-                        ...btnStyle, flex: 1,
-                        background: difficulty === d.key ? "#1677ff" : "var(--hover-bg)",
-                        color: difficulty === d.key ? "white" : "var(--text)",
-                      }}
-                    >
-                      {d.label}
-                      <br /><small>({d.sub})</small>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {mode === "normal" && difficulty === "custom" && (
-                <div>
-                  <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>自訂最大範圍</label>
-                  <input
-                    value={customMax}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      if (/^\d*$/.test(v)) setCustomMax(v);
-                    }}
-                    placeholder="輸入正整數（≥ 2）"
-                    style={inputStyle}
-                  />
-                </div>
-              )}
-
-                  {mode === "challenge" && (
-                    <div style={{
-                      background: "var(--challenge-rules-bg, linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%))",
-                      borderLeft: "4px solid #722ed1", borderRadius: 8,
-                      padding: "0.8rem 1rem", fontSize: "0.85rem", lineHeight: 1.6,
-                    }}>
-                      <strong style={{ fontSize: "1rem", color: "#722ed1" }}>📋 闖關規則</strong>
-                      <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.2rem", color: "var(--challenge-rules-text, #555)" }}>
-                        <li>每關需在有限嘗試次數內猜中數字</li>
-                        <li>每通過一關，範圍擴大、次數重置</li>
-                        <li>通過 <strong style={{ color: "#722ed1" }}>10 關</strong>即為勝利 🎉</li>
-                        <li>各關卡不限時，但整局遊戲限時 <strong>5 分鐘</strong></li>
-                        <li>提示次數（共 3 次）跨關卡保留</li>
-                        <li>未通關不列入排行榜，仍計入個人統計</li>
-                      </ul>
-                    </div>
-                  )}
-
-              <button onClick={() => handleStartGame()} disabled={loading || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
-                {loading ? "啟動中..." : "開始遊戲"}
-              </button>
-            </>
+            </div>
           )}
+
+          <div>
+            <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>遊戲模式</label>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              {MODES.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => { setMode(m.key); setDifficulty("easy"); setCustomMax(""); }}
+                  style={{
+                    ...btnStyle, flex: 1,
+                    background: mode === m.key ? "#1677ff" : "var(--hover-bg)",
+                    color: mode === m.key ? "white" : "var(--text)",
+                  }}
+                >
+                  {m.label}
+                  <br /><small>{m.desc}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
+              {mode === "normal" ? "難度（範圍）" : "難度（嘗試次數）"}
+            </label>
+            <div style={{ display: "flex", gap: "0.5rem" }}>
+              {(mode === "normal" ? NORMAL_DIFFS : CHALLENGE_DIFFS).map((d) => (
+                <button
+                  key={d.key}
+                  onClick={() => setDifficulty(d.key)}
+                  style={{
+                    ...btnStyle, flex: 1,
+                    background: difficulty === d.key ? "#1677ff" : "var(--hover-bg)",
+                    color: difficulty === d.key ? "white" : "var(--text)",
+                  }}
+                >
+                  {d.label}
+                  <br /><small>({d.sub})</small>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {mode === "normal" && difficulty === "custom" && (
+            <div>
+              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>自訂最大範圍</label>
+              <input
+                value={customMax}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (/^\d*$/.test(v)) setCustomMax(v);
+                }}
+                placeholder="輸入正整數（≥ 2）"
+                style={inputStyle}
+              />
+            </div>
+          )}
+
+          {mode === "challenge" && (
+            <div style={{
+              background: "var(--challenge-rules-bg, linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%))",
+              borderLeft: "4px solid #722ed1", borderRadius: 8,
+              padding: "0.8rem 1rem", fontSize: "0.85rem", lineHeight: 1.6,
+            }}>
+              <strong style={{ fontSize: "1rem", color: "#722ed1" }}>📋 闖關規則</strong>
+              <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.2rem", color: "var(--challenge-rules-text, #555)" }}>
+                <li>每關需在有限嘗試次數內猜中數字</li>
+                <li>每通過一關，範圍擴大、次數重置</li>
+                <li>通過 <strong style={{ color: "#722ed1" }}>10 關</strong>即為勝利 🎉</li>
+                <li>各關卡不限時，但整局遊戲限時 <strong>5 分鐘</strong></li>
+                <li>提示次數（共 3 次）跨關卡保留</li>
+                <li>未通關不列入排行榜，仍計入個人統計</li>
+              </ul>
+            </div>
+          )}
+
+          <button onClick={() => handleStartGame(isLoggedIn ? undefined : "unknown")} disabled={loading || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
+            {loading ? "啟動中..." : "開始遊戲"}
+          </button>
         </div>
       ) : (
         <div style={cardStyle}>
