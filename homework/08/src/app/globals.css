@@ -10,6 +10,8 @@
   --hover-bg: #f0f0f0;
   --muted-bg: #f9f9f9;
   --input-bg: #fff;
+  --challenge-rules-bg: linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%);
+  --challenge-rules-text: #555;
 }
 
 [data-theme="dark"] {
@@ -24,6 +26,8 @@
   --hover-bg: #2a2a2a;
   --muted-bg: #262626;
   --input-bg: #2a2a2a;
+  --challenge-rules-bg: linear-gradient(135deg, #1a0a2e 0%, #16213e 100%);
+  --challenge-rules-text: #c9b0e0;
 }
 
 body {
