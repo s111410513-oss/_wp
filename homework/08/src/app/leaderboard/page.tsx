@@ -82,7 +82,7 @@ export default function LeaderboardPage() {
             onClick={() => { setMode(m.key); setFilter("all"); }}
             style={{
               ...btnStyle, flex: 1,
-              background: mode === m.key ? "#1677ff" : "var(--hover-bg)",
+              background: mode === m.key ? "#1677ff" : "var(--muted-bg)",
               color: mode === m.key ? "white" : "var(--text)",
             }}
           >

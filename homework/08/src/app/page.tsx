@@ -561,7 +561,7 @@ export default function HomePage() {
                       style={{
                         ...btnStyle, flex: 1,
                         background: mode === m.key ? "#1677ff" : "var(--hover-bg)",
-                        color: mode === m.key ? "white" : "#333",
+                        color: mode === m.key ? "white" : "var(--text)",
                       }}
                     >
                       {m.label}
@@ -582,8 +582,8 @@ export default function HomePage() {
                       onClick={() => setDifficulty(d.key)}
                       style={{
                         ...btnStyle, flex: 1,
-                        background: difficulty === d.key ? "#1677ff" : "#e0e0e0",
-                        color: difficulty === d.key ? "white" : "#333",
+                        background: difficulty === d.key ? "#1677ff" : "var(--hover-bg)",
+                        color: difficulty === d.key ? "white" : "var(--text)",
                       }}
                     >
                       {d.label}
@@ -754,7 +754,7 @@ export default function HomePage() {
                         disabled={loading || (game.hintsLeft ?? 0) <= 0}
                         style={{
                           flex: 1, fontSize: "0.78rem", padding: "0.35rem 0.3rem",
-                          background: "var(--hover-bg)", color: "#333", border: "1px solid var(--border-light)",
+                          background: "var(--hover-bg)", color: "var(--text)", border: "1px solid var(--border-light)",
                           borderRadius: 6, cursor: "pointer", fontWeight: 500,
                           opacity: (game.hintsLeft ?? 0) <= 0 ? 0.5 : 1,
                         }}
@@ -862,8 +862,8 @@ export default function HomePage() {
                     }}
                     style={{
                       ...btnStyle, textAlign: "left",
-                      background: userTitle === t ? "#1677ff" : locked ? "#e0e0e0" : "#f0f0f0",
-                      color: userTitle === t ? "white" : locked ? "#bbb" : "#333",
+                      background: userTitle === t ? "#1677ff" : locked ? "var(--hover-bg)" : "var(--muted-bg)",
+                      color: userTitle === t ? "white" : locked ? "var(--text-muted)" : "var(--text)",
                       fontWeight: userTitle === t ? 700 : 500, cursor: locked ? "not-allowed" : "pointer",
                     }}
                   >
