@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { playCorrect, playWrong, playLevelUp, playGameOver, playTimeout, playHint } from "@/lib/sound";
+import { playCorrect, playWrong, playLevelUp, playGameOver, playTimeout, playHint, setSfxEnabled, setSfxVolume, isSfxEnabled, getSfxVolume } from "@/lib/sound";
 import { startBgm, stopBgm, setBgmVolume, getBgmVolume, isBgmPlaying } from "@/lib/bgm";
 
 type GameData = {
@@ -102,6 +102,8 @@ export default function HomePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [bgmEnabled, setBgmEnabled] = useState(true);
   const [bgmVolume, setBgmVolumeState] = useState(0.3);
+  const [sfxEnabled, setSfxEnabledState] = useState(true);
+  const [sfxVolume, setSfxVolumeState] = useState(0.3);
   const bgmStartedRef = useRef(false);
 
   useEffect(() => {
@@ -143,13 +145,17 @@ export default function HomePage() {
         setBgmVolume(vol);
         if (!d.bgmEnabled) stopBgm();
         else if (bgmStartedRef.current) startBgm();
+        setSfxEnabledState(d.sfxEnabled ?? true);
+        setSfxVolumeState(d.sfxVolume ?? 0.3);
+        setSfxVolume(d.sfxVolume ?? 0.3);
+        setSfxEnabled(d.sfxEnabled ?? true);
       } catch { /* ignore */ }
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("ng_settings", JSON.stringify({ bgmEnabled, bgmVolume }));
-  }, [bgmEnabled, bgmVolume]);
+    localStorage.setItem("ng_settings", JSON.stringify({ bgmEnabled, bgmVolume, sfxEnabled, sfxVolume }));
+  }, [bgmEnabled, bgmVolume, sfxEnabled, sfxVolume]);
 
   function toggleBgm() {
     if (bgmEnabled) {
@@ -168,6 +174,17 @@ export default function HomePage() {
   function handleBgmVolume(vol: number) {
     setBgmVolumeState(vol);
     setBgmVolume(vol);
+  }
+
+  function toggleSfx() {
+    const next = !sfxEnabled;
+    setSfxEnabledState(next);
+    setSfxEnabled(next);
+  }
+
+  function handleSfxVolume(vol: number) {
+    setSfxVolumeState(vol);
+    setSfxVolume(vol);
   }
 
   useEffect(() => {
@@ -1020,6 +1037,31 @@ export default function HomePage() {
               <input
                 type="range" min={0} max={100} value={Math.round(bgmVolume * 100)}
                 onChange={(e) => handleBgmVolume(Number(e.target.value) / 100)}
+                style={{ width: "100%", accentColor: "#722ed1" }}
+              />
+            </div>
+
+            <div style={{ marginTop: "0.8rem" }}>
+              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
+                音效
+              </label>
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <button onClick={toggleSfx} style={{
+                  ...btnStyle, flex: 1,
+                  background: sfxEnabled ? "#52c41a" : "#f5222d",
+                }}>
+                  {sfxEnabled ? "🟢 開啟" : "🔴 關閉"}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: 500, marginBottom: "0.3rem", display: "block" }}>
+                音量：{Math.round(sfxVolume * 100)}%
+              </label>
+              <input
+                type="range" min={0} max={100} value={Math.round(sfxVolume * 100)}
+                onChange={(e) => handleSfxVolume(Number(e.target.value) / 100)}
                 style={{ width: "100%", accentColor: "#722ed1" }}
               />
             </div>
