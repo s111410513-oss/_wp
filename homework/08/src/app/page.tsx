@@ -402,7 +402,7 @@ export default function HomePage() {
     <main style={{ maxWidth: 600, margin: "0 auto", padding: "2rem 1rem" }}>
       <h1 style={{ textAlign: "center", fontSize: "2rem" }}>🔢 Number Guessing Game</h1>
       <p style={{ textAlign: "center", color: "var(--text-secondary)" }}>
-        {mode === "normal" ? "不限次數，越少 attempts 排名越高！" : "有限次數，逐關挑戰，看你能闖到第幾關！"}
+        {mode === "normal" ? "不限次數，越少 attempts 排名越高！" : "有限次數，逐關挑戰，通過 10 關即勝利！"}
       </p>
 
       <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginBottom: "1.5rem" }}>
@@ -617,15 +617,20 @@ export default function HomePage() {
             <div style={{
               background: "var(--challenge-rules-bg, linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%))",
               borderLeft: "4px solid #722ed1", borderRadius: 8,
-              padding: "0.8rem 1rem", fontSize: "0.85rem", lineHeight: 1.6,
+              padding: "0.8rem 1rem", fontSize: "0.85rem", lineHeight: 1.7,
             }}>
               <strong style={{ fontSize: "1rem", color: "#722ed1" }}>📋 闖關規則</strong>
               <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.2rem", color: "var(--challenge-rules-text, #555)" }}>
-                <li>每關需在有限嘗試次數內猜中數字</li>
-                <li>每通過一關，範圍擴大、次數重置</li>
-                <li>通過 <strong style={{ color: "#722ed1" }}>10 關</strong>即為勝利 🎉</li>
+                <li>目標：逐關猜中數字，通過 <strong style={{ color: "#722ed1" }}>10 關</strong>即勝利 🎉</li>
+                <li>每關範圍從 <strong>0</strong> 開始，第 n 關範圍 = 1000 + 255×(n−1)（逐關 +255）</li>
+                <li>每關嘗試次數依難度不同：
+                  <br/>• 普通：<strong>log₂(範圍) + ⌊n/2⌋ + 8</strong>
+                  <br/>• 困難：<strong>log₂(範圍) + ⌊n/3⌋ + 2</strong>
+                  <br/>• 極度困難：<strong>log₂(範圍) + ⌊n/5⌋</strong>
+                </li>
+                <li>猜中後進入下一關，嘗試次數<strong>重置</strong>、範圍<strong>擴大</strong></li>
+                <li>提示次數（共 <strong>3 次</strong>）跨關卡保留，可選奇偶 / 大小區間 / 個位數字</li>
                 <li>各關卡不限時，但整局遊戲限時 <strong>5 分鐘</strong></li>
-                <li>提示次數（共 3 次）跨關卡保留</li>
                 <li>未通關不列入排行榜，仍計入個人統計</li>
               </ul>
             </div>
