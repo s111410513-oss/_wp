@@ -525,17 +525,14 @@ export default function HomePage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <h2 style={{ margin: 0 }}>👋 {playerName}</h2>
-                  {userTitle && (
-                    <span style={{
-                      display: "inline-block", marginTop: "0.2rem",
-                      fontSize: "0.8rem", fontWeight: 700,
-                      background: "linear-gradient(135deg, #722ed1, #eb2f96)",
-                      color: "white", padding: "0.15rem 0.7rem", borderRadius: 10,
-                      boxShadow: "0 2px 6px rgba(114,46,209,0.3)",
-                    }}>
-                      👑 {userTitle}
-                    </span>
-                  )}
+                  {userTitle && (() => {
+                    const ts = getTitleStyle(userTitle);
+                    return (
+                      <span style={ts.badge}>
+                        {ts.icon} {userTitle}
+                      </span>
+                    );
+                  })()}
                 </div>
                 <div style={{ display: "flex", gap: "0.4rem" }}>
                   <button onClick={() => setShowTitles(true)}
@@ -654,16 +651,14 @@ export default function HomePage() {
                 background: "#888",
               }}>← 大廳</button>
               <h2 style={{ margin: 0 }}>{playerName}</h2>
-              {userTitle && (
-                <span style={{
-                  fontSize: "0.7rem", fontWeight: 700,
-                  background: "linear-gradient(135deg, #722ed1, #eb2f96)",
-                  color: "white", padding: "0.1rem 0.5rem", borderRadius: 8,
-                  boxShadow: "0 2px 4px rgba(114,46,209,0.2)",
-                }}>
-                  👑 {userTitle}
-                </span>
-              )}
+              {userTitle && (() => {
+                const ts = getTitleStyle(userTitle);
+                return (
+                  <span style={{ ...ts.badge, fontSize: "0.7rem", marginTop: 0, padding: "0.08rem 0.5rem" }}>
+                    {ts.icon} {userTitle}
+                  </span>
+                );
+              })()}
             </div>
             <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
               {game.mode === "challenge" && (
@@ -933,6 +928,58 @@ export default function HomePage() {
       )}
     </main>
   );
+}
+
+function getTitleStyle(title: string): { badge: React.CSSProperties; icon: string } {
+  switch (title) {
+    case "管理員":
+      return {
+        icon: "👑",
+        badge: {
+          display: "inline-block", marginTop: "0.2rem",
+          fontSize: "0.85rem", fontWeight: 800,
+          background: "linear-gradient(135deg, #f9d423 0%, #ff4e50 50%, #f9d423 100%)",
+          color: "white", padding: "0.2rem 0.9rem", borderRadius: 12,
+          boxShadow: "0 0 12px rgba(249,212,35,0.6), 0 0 24px rgba(255,78,80,0.3)",
+          border: "1px solid rgba(255,215,0,0.6)",
+          letterSpacing: "0.05em",
+        },
+      };
+    case "神之一筆":
+      return {
+        icon: "✨",
+        badge: {
+          display: "inline-block", marginTop: "0.2rem",
+          fontSize: "0.82rem", fontWeight: 750,
+          background: "linear-gradient(135deg, #667eea 0%, #f9d423 100%)",
+          color: "white", padding: "0.18rem 0.8rem", borderRadius: 11,
+          boxShadow: "0 0 10px rgba(102,126,234,0.5)",
+          border: "1px solid rgba(249,212,35,0.4)",
+        },
+      };
+    case "挑戰者":
+      return {
+        icon: "⚔️",
+        badge: {
+          display: "inline-block", marginTop: "0.2rem",
+          fontSize: "0.8rem", fontWeight: 700,
+          background: "linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%)",
+          color: "white", padding: "0.15rem 0.7rem", borderRadius: 10,
+          boxShadow: "0 2px 8px rgba(91,134,229,0.35)",
+        },
+      };
+    default: // 初心者
+      return {
+        icon: "🌱",
+        badge: {
+          display: "inline-block", marginTop: "0.2rem",
+          fontSize: "0.78rem", fontWeight: 600,
+          background: "linear-gradient(135deg, #e0e0e0 0%, #b0b0b0 100%)",
+          color: "#444", padding: "0.12rem 0.6rem", borderRadius: 9,
+          boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+        },
+      };
+  }
 }
 
 const cardStyle: React.CSSProperties = {
