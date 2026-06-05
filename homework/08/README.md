@@ -44,7 +44,9 @@
 - ✨ CSS 動畫（結果彈入、溫度提示淡入、通知展開）
 - 🔍 溫度提示系統（超燙 ±5 / 很接近 ±20 / 普通 ±50 / 很遠 >50）
 - 📝 猜測歷史紀錄（闖關模式按關卡分組）
-- 🎵 Web Audio API 音效（猜對、猜錯、升階、遊戲結束、超時、提示）
+- 🎵 Web Audio API 音效（猜對、猜錯、升階、遊戲結束、超時、提示），可獨立開關與調整音量
+- 🎶 Web Audio API 背景音樂（8 和弦循環播放），可獨立開關與調整音量
+- ⚙️ 設定面板（BGM 開關/音量 + 音效開關/音量），設定自動儲存至 localStorage
 - ⌨️ 輸入框自動聚焦，連續遊玩不需點擊
 
 ## 技術架構
@@ -99,6 +101,7 @@ homework/08/
 │   └── lib/
 │       ├── achievements.ts    # 成就定義與檢查邏輯
 │       ├── challenge.ts       # 闖關公式
+│       ├── bgm.ts             # 背景音樂（Web Audio API 和弦循環）
 │       ├── game-store.ts      # 遊戲狀態記憶體儲存
 │       ├── prisma.ts          # Prisma client singleton
 │       └── sound.ts           # Web Audio API 音效
