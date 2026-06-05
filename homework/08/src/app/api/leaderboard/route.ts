@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
 
   if (mode === "challenge") {
     const scores = await prisma.score.findMany({
-      where,
+      where: { ...where, won: true },
       distinct: ["playerName", "difficulty"],
       orderBy: [{ levelsCleared: "desc" }, { attempts: "asc" }],
       take: 50,

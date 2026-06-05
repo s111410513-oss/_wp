@@ -608,6 +608,23 @@ export default function HomePage() {
                 </div>
               )}
 
+              {mode === "challenge" && (
+                <div style={{
+                  background: "var(--muted-bg)", borderRadius: 8, padding: "0.8rem 1rem",
+                  fontSize: "0.85rem", lineHeight: 1.6,
+                }}>
+                  <strong style={{ color: "#722ed1" }}>📋 闖關規則</strong>
+                  <ul style={{ margin: "0.3rem 0 0", paddingLeft: "1.2rem", color: "var(--text-secondary)" }}>
+                    <li>每關需在有限嘗試次數內猜中數字</li>
+                    <li>每通過一關，範圍擴大、次數重置</li>
+                    <li>通過 <strong>10 關</strong>即為勝利 🎉</li>
+                    <li>各關卡不限時，但整局遊戲限時 <strong>5 分鐘</strong></li>
+                    <li>提示次數（共 3 次）跨關卡保留</li>
+                    <li>未通關不列入排行榜，仍計入個人統計</li>
+                  </ul>
+                </div>
+              )}
+
               <button onClick={() => handleStartGame()} disabled={loading || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
                 {loading ? "啟動中..." : "開始遊戲"}
               </button>
