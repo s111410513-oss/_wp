@@ -613,14 +613,19 @@ export default function HomePage() {
             </div>
           )}
 
-          {mode === "challenge" && (
+          <details open>
+            <summary style={{
+              cursor: "pointer", fontWeight: 600, color: "#722ed1",
+              fontSize: "0.9rem", padding: "0.2rem 0",
+            }}>
+              📋 闖關模式玩法說明
+            </summary>
             <div style={{
               background: "var(--challenge-rules-bg, linear-gradient(135deg, #f9f0ff 0%, #f0e6ff 100%))",
               borderLeft: "4px solid #722ed1", borderRadius: 8,
-              padding: "0.8rem 1rem", fontSize: "0.85rem", lineHeight: 1.7,
+              padding: "0.8rem 1rem", fontSize: "0.85rem", lineHeight: 1.7, marginTop: "0.3rem",
             }}>
-              <strong style={{ fontSize: "1rem", color: "#722ed1" }}>📋 闖關規則</strong>
-              <ul style={{ margin: "0.4rem 0 0", paddingLeft: "1.2rem", color: "var(--challenge-rules-text, #555)" }}>
+              <ul style={{ margin: 0, paddingLeft: "1.2rem", color: "var(--challenge-rules-text, #555)" }}>
                 <li>目標：逐關猜中數字，通過 <strong style={{ color: "#722ed1" }}>10 關</strong>即勝利 🎉</li>
                 <li>每關範圍從 <strong>0</strong> 開始，第 n 關範圍 = 1000 + 255×(n−1)（逐關 +255）</li>
                 <li>每關嘗試次數依難度不同：
@@ -634,7 +639,7 @@ export default function HomePage() {
                 <li>未通關不列入排行榜，仍計入個人統計</li>
               </ul>
             </div>
-          )}
+          </details>
 
           <button onClick={() => handleStartGame(isLoggedIn ? undefined : "unknown")} disabled={loading || (mode === "normal" && difficulty === "custom" && !(Number(customMax) >= 2))} style={btnStyle}>
             {loading ? "啟動中..." : "開始遊戲"}
